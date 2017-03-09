@@ -26,23 +26,16 @@ $(function() {
 
 function initCalendar() {
     $('#calendar').calendar({
-        enableRangeSelection: true,
+        enableRangeSelection: false,
         allowOverlap: false,
         language: 'de',
         style: 'custom',
-        selectRange: function(e) {
-            editEvent({
-                startDate: e.startDate,
-                endDate: e.endDate
-            });
-        },
         clickDay: function(e) {
             if (e.events.length > 0) {
                 editEvent(e.events[0]);
             } else {
                 editEvent({
-                    startDate: e.date,
-                    endDate: e.date
+                    startDate: e.date
                 })
             }
         },
@@ -101,7 +94,6 @@ function editEvent(event) {
     $('#event-modal input[name="event-marked"]').val(event ? event.marked : '');
     $('#event-modal input[name="event-location"]').val(event ? event.location : '');
     $('#event-modal input[name="event-start-date"]').datepicker('update', event ? event.startDate : '');
-    $('#event-modal input[name="event-end-date"]').datepicker('update', event ? event.endDate : '');
     event.id ? $('#delete-event').show() : $('#delete-event').hide();
     $('#event-modal').modal();
 }
@@ -109,16 +101,23 @@ function editEvent(event) {
 function deleteEvent() {
     var id = $('#event-modal input[name="event-index"]').val();
     var entries = $('#calendar').data('calendar').getDataSource();
-    for (var i in entries) {
+    for (let i in entries) {
         if (entries[i].id == id) {
-            dbconnection.deleteEntry(entries[i]);
-            entries.splice(i, 1);
+            dbconnection.deleteEntry({
+                entry: entries[i],
+                success: function() {
+                    entries.splice(i, 1);
+                    marker.markErrors(entries);
+                    $('#calendar').data('calendar').setDataSource(entries);
+                    $('#event-modal').modal('hide');
+                },
+                error: function(jqXHR, textStatus, error) {
+                    alert(textStatus + ': ' + error);
+                }
+            });
             break;
         }
     }
-    marker.markErrors(entries);
-    $('#calendar').data('calendar').setDataSource(entries);
-    $('#event-modal').modal('hide');
 }
 
 function saveEvent() {
@@ -127,32 +126,45 @@ function saveEvent() {
         marked: $('#event-modal input[name="event-marked"]').val(),
         location: $('#event-modal input[name="event-location"]').val(),
         startDate: $('#event-modal input[name="event-start-date"]').datepicker('getDate'),
-        endDate: $('#event-modal input[name="event-end-date"]').datepicker('getDate')
+        endDate: $('#event-modal input[name="event-start-date"]').datepicker('getDate')
     }
     var entries = $('#calendar').data('calendar').getDataSource();
     if (event.id) {
         for (var i in entries) {
             if (entries[i].id == event.id) {
-                entries[i].marked = event.marked;
-                entries[i].location = event.location;
-                entries[i].startDate = event.startDate;
-                entries[i].endDate = event.endDate;
-                dbconnection.updateEntry(entries[i]);
+                dbconnection.updateEntry({
+                    entry: event,
+                    oldDate: entries[i].startDate,
+                    success: function() {
+                        entries[i].marked = event.marked;
+                        entries[i].location = event.location;
+                        entries[i].startDate = event.startDate;
+                        entries[i].endDate = event.startDate;
+                        marker.markErrors(entries);
+                        $('#calendar').data('calendar').setDataSource(entries);
+                        $('#event-modal').modal('hide');
+                    },
+                    error: function(jqXHR, textStatus, error) {
+                        alert(textStatus + ': ' + error);
+                    }
+                });
+                break;
             }
         }
     } else {
-        var newId = 0;
-        for (var i in entries) {
-            if (entries[i].id > newId) {
-                newId = entries[i].id;
+        dbconnection.addEntry({
+            entry: event,
+            success: function(newId) {
+                event.id = newId;
+                entries.push(event);
+                marker.markErrors(entries);
+                console.log(entries);
+                $('#calendar').data('calendar').setDataSource(entries);
+                $('#event-modal').modal('hide');
+            },
+            error: function(jqXHR, textStatus, error) {
+                alert(textStatus + ': ' + error);
             }
-        }
-        newId++;
-        event.id = newId;
-        entries.push(event);
-        dbconnection.addEntry(event);
+        });
     }
-    marker.markErrors(entries);
-    $('#calendar').data('calendar').setDataSource(entries);
-    $('#event-modal').modal('hide');
 }

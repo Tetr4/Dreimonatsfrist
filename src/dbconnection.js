@@ -7,17 +7,35 @@ module.exports = {
             callback(entries);
         });
     },
-    addEntry: function(entry) {
-        console.log("add");
-        console.log(entry);
+    addEntry: function({ entry, success, error }) {
+        entry.date = entry.startDate.toString("yyyy-MM-dd");
+        $.ajax({
+            url: "./entries/" + entry.date + "/",
+            type: 'POST',
+            data: entry,
+            dataType: "text",
+            success: success,
+            error: error
+        });
     },
-    updateEntry: function(entry) {
-        console.log("update");
-        console.log(entry);
+    updateEntry: function({ entry, oldDate, success, error }) {
+        entry.date = entry.startDate.toString("yyyy-MM-dd");
+        $.ajax({
+            url: "./entries/" + oldDate.toString("yyyy-MM-dd") + "/",
+            type: 'PUT',
+            data: entry,
+            success: success,
+            error: error
+        });
     },
-    deleteEntry: function(entry) {
-        console.log("delete");
-        console.log(entry);
+    deleteEntry: function({ entry, success, error }) {
+        entry.date = entry.startDate.toString("yyyy-MM-dd");
+        $.ajax({
+            url: "./entries/" + entry.date + "/",
+            type: 'DELETE',
+            success: success,
+            error: error
+        });
     }
 }
 

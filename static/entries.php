@@ -194,7 +194,7 @@ class Calendar {
             respond(500, "Error: " . $this->mysqli->error);
         }
         // 201 - Created
-        respond(201, "Entry created");
+        respond(201, "Entry created", $this->mysqli->insert_id);
     }
 
     public function update_entry($date, $new_date, $new_location){

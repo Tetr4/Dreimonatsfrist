@@ -1,6 +1,4 @@
 import 'babel-polyfill';
-import $ from 'jquery';
-import style from "./style.css";
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-datepicker';
@@ -8,7 +6,11 @@ import 'bootstrap-datepicker/dist/css/bootstrap-datepicker.css';
 import 'bootstrap-year-calendar';
 import 'bootstrap-year-calendar/js/languages/bootstrap-year-calendar.de.js';
 import 'bootstrap-year-calendar/css/bootstrap-year-calendar.css';
+import $ from 'jquery';
 import 'datejs';
+import style from "./style.css";
+import dbconnection from './dbconnection';
+import marker from './errormarker';
 
 var markedColor = 'rgb(255, 50, 50)';
 var defaultColor = 'rgb(30, 200, 20)';
@@ -16,7 +18,10 @@ var defaultColor = 'rgb(30, 200, 20)';
 $(function() {
     initCalendar();
     initModal();
-    loadEntries();
+    dbconnection.loadEntries(function(entries) {
+        marker.markErrors(entries);
+        $('#calendar').data('calendar').setDataSource(entries);
+    });
 });
 
 function initCalendar() {
@@ -91,67 +96,6 @@ function initModal() {
     });
 }
 
-function loadEntries() {
-    $.getJSON("./entries.json", function(json) {
-        var entries = asCalendarDataSource(json);
-        markEntries(entries);
-        $('#calendar').data('calendar').setDataSource(entries);
-    });
-}
-
-function asCalendarDataSource(entries) {
-    for (let i in entries) {
-        var entry = entries[i];
-        entry.id = i;
-        entry.startDate = new Date(entry.date.date)
-        entry.endDate = new Date(entry.startDate);
-    }
-    return entries;
-}
-
-function markEntries(entries) {
-    for (let i in entries) {
-        entries[i].marked = false;
-    }
-
-    for (let i in entries) {
-        var entry = entries[i];
-
-        var sameLocation = entries.filter(function (otherEntry) {
-            return otherEntry.location === entry.location;
-        });
-        var earliestMatchingDate = entry.startDate;
-        var latestMatchingDate = entry.startDate;
-        var candidatesToMark = [entry];
-
-        var sameLocationInSameWeek = 0;
-        for (let j in sameLocation) {
-            var otherEntry = sameLocation[j];
-            if (entry.startDate.getISOWeek()  == otherEntry.startDate.getISOWeek()) {
-                sameLocationInSameWeek += 1;
-                earliestMatchingDate = earliestMatchingDate.isBefore(otherEntry.startDate) ? earliestMatchingDate : otherEntry.startDate;
-                latestMatchingDate = latestMatchingDate.isAfter(otherEntry.startDate) ? latestMatchingDate : otherEntry.startDate;
-                candidatesToMark.push(otherEntry);
-            }
-        }
-
-        if (sameLocationInSameWeek >= 3) {
-            var endDate = earliestMatchingDate.clone().addDays(91);
-            for (let j in sameLocation) {
-                var otherEntry = sameLocation[j];
-                if (otherEntry.startDate.between(latestMatchingDate.clone().addDays(1), latestMatchingDate.clone().addDays(28))
-                        && otherEntry.startDate.isBefore(endDate)) {
-                    candidatesToMark.push(otherEntry);
-                    latestMatchingDate = otherEntry.startDate;
-                }
-            }
-            for (let j in candidatesToMark) {
-                candidatesToMark[j].marked = true;
-            }
-        }
-    }
-}
-
 function editEvent(event) {
     $('#event-modal input[name="event-index"]').val(event ? event.id : '');
     $('#event-modal input[name="event-marked"]').val(event ? event.marked : '');
@@ -167,12 +111,12 @@ function deleteEvent() {
     var entries = $('#calendar').data('calendar').getDataSource();
     for (var i in entries) {
         if (entries[i].id == id) {
+            dbconnection.deleteEntry(entries[i]);
             entries.splice(i, 1);
-            // TODO remove from database
             break;
         }
     }
-    markEntries(entries);
+    marker.markErrors(entries);
     $('#calendar').data('calendar').setDataSource(entries);
     $('#event-modal').modal('hide');
 }
@@ -193,9 +137,9 @@ function saveEvent() {
                 entries[i].location = event.location;
                 entries[i].startDate = event.startDate;
                 entries[i].endDate = event.endDate;
+                dbconnection.updateEntry(entries[i]);
             }
         }
-        // TODO update in database
     } else {
         var newId = 0;
         for (var i in entries) {
@@ -206,9 +150,9 @@ function saveEvent() {
         newId++;
         event.id = newId;
         entries.push(event);
-        // TODO save in database
+        dbconnection.addEntry(event);
     }
-    markEntries(entries);
+    marker.markErrors(entries);
     $('#calendar').data('calendar').setDataSource(entries);
     $('#event-modal').modal('hide');
 }

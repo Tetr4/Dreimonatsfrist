@@ -38,7 +38,6 @@ class Calendar {
         $this->entries = $this->load_entries($user_id);
         $this->entries = $this->sql_result_to_array($this->entries);
         $this->entries = $this->array_entries_to_objects($this->entries);
-        $this->entries = $this->sort_by_date($this->entries);
 	}
 
 	function __destruct() {
@@ -90,13 +89,6 @@ class Calendar {
             $entry_object->location = $entry['Location'];
             $entries[$key] = $entry_object;
         }
-        return $entries;
-    }
-
-    private function sort_by_date($entries) {
-        usort($entries, function($a, $b) {
-            return $a->date > $b->date;
-        });
         return $entries;
     }
 }

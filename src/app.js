@@ -1,112 +1,59 @@
 import 'babel-polyfill';
 import $ from 'jquery';
 import style from "./style.css";
-require('bootstrap/dist/css/bootstrap.css');
-require('bootstrap');
+import 'bootstrap';
+import 'bootstrap/dist/css/bootstrap.css';
+import 'bootstrap-datepicker';
+import 'bootstrap-datepicker/dist/css/bootstrap-datepicker.css';
 import 'bootstrap-year-calendar';
+import 'bootstrap-year-calendar/js/languages/bootstrap-year-calendar.de.js';
+import 'bootstrap-year-calendar/css/bootstrap-year-calendar.css';
+import 'datejs';
 
-//$.getJSON("./entries.json", show_entries);
-//function show_entries(entries) {
-//    console.log(entries);
-//}
-
-
-function editEvent(event) {
-    $('#event-modal input[name="event-index"]').val(event ? event.id : '');
-    $('#event-modal input[name="event-name"]').val(event ? event.name : '');
-    $('#event-modal input[name="event-location"]').val(event ? event.location : '');
-    $('#event-modal input[name="event-start-date"]').datepicker('update', event ? event.startDate : '');
-    $('#event-modal input[name="event-end-date"]').datepicker('update', event ? event.endDate : '');
-    $('#event-modal').modal();
-}
-
-function deleteEvent(event) {
-    var dataSource = $('#calendar').data('calendar').getDataSource();
-
-    for(var i in dataSource) {
-        if(dataSource[i].id == event.id) {
-            dataSource.splice(i, 1);
-            break;
-        }
-    }
-
-    $('#calendar').data('calendar').setDataSource(dataSource);
-}
-
-function saveEvent() {
-    var event = {
-        id: $('#event-modal input[name="event-index"]').val(),
-        name: $('#event-modal input[name="event-name"]').val(),
-        location: $('#event-modal input[name="event-location"]').val(),
-        startDate: $('#event-modal input[name="event-start-date"]').datepicker('getDate'),
-        endDate: $('#event-modal input[name="event-end-date"]').datepicker('getDate')
-    }
-
-    var dataSource = $('#calendar').data('calendar').getDataSource();
-
-    if(event.id) {
-        for(var i in dataSource) {
-            if(dataSource[i].id == event.id) {
-                dataSource[i].name = event.name;
-                dataSource[i].location = event.location;
-                dataSource[i].startDate = event.startDate;
-                dataSource[i].endDate = event.endDate;
-            }
-        }
-    }
-    else
-    {
-        var newId = 0;
-        for(var i in dataSource) {
-            if(dataSource[i].id > newId) {
-                newId = dataSource[i].id;
-            }
-        }
-
-        newId++;
-        event.id = newId;
-
-        dataSource.push(event);
-    }
-
-    $('#calendar').data('calendar').setDataSource(dataSource);
-    $('#event-modal').modal('hide');
-}
+var markedColor = 'rgb(255, 50, 50)';
+var defaultColor = 'rgb(30, 200, 20)';
 
 $(function() {
-    var currentYear = new Date().getFullYear();
+    initCalendar();
+    initModal();
+    loadEntries();
+});
 
+function initCalendar() {
     $('#calendar').calendar({
-        enableContextMenu: true,
         enableRangeSelection: true,
-        contextMenuItems:[
-            {
-                text: 'Update',
-                click: editEvent
-            },
-            {
-                text: 'Delete',
-                click: deleteEvent
-            }
-        ],
+        allowOverlap: false,
+        language: 'de',
+        style: 'custom',
         selectRange: function(e) {
-            editEvent({ startDate: e.startDate, endDate: e.endDate });
+            editEvent({
+                startDate: e.startDate,
+                endDate: e.endDate
+            });
+        },
+        clickDay: function(e) {
+            if (e.events.length > 0) {
+                editEvent(e.events[0]);
+            } else {
+                editEvent({
+                    startDate: e.date,
+                    endDate: e.date
+                })
+            }
         },
         mouseOnDay: function(e) {
-            if(e.events.length > 0) {
+            if (e.events.length > 0) {
                 var content = '';
 
-                for(var i in e.events) {
-                    content += '<div class="event-tooltip-content">'
-                                    + '<div class="event-name" style="color:' + e.events[i].color + '">' + e.events[i].name + '</div>'
-                                    + '<div class="event-location">' + e.events[i].location + '</div>'
-                                + '</div>';
-                }
+                var color = e.events[0].marked ? markedColor : defaultColor;
+                content += '<div class="event-tooltip-content">' +
+                    '<div class="event-name" style="color:' + color + '">' + e.events[0].location + '</div>' +
+                    '</div>';
 
                 $(e.element).popover({
                     trigger: 'manual',
                     container: 'body',
-                    html:true,
+                    html: true,
                     content: content
                 });
 
@@ -114,88 +61,154 @@ $(function() {
             }
         },
         mouseOutDay: function(e) {
-            if(e.events.length > 0) {
+            if (e.events.length > 0) {
                 $(e.element).popover('hide');
             }
         },
         dayContextMenu: function(e) {
             $(e.element).popover('hide');
         },
-        dataSource: [
-            {
-                id: 0,
-                name: 'Google I/O',
-                location: 'San Francisco, CA',
-                startDate: new Date(currentYear, 4, 28),
-                endDate: new Date(currentYear, 4, 29)
-            },
-            {
-                id: 1,
-                name: 'Microsoft Convergence',
-                location: 'New Orleans, LA',
-                startDate: new Date(currentYear, 2, 16),
-                endDate: new Date(currentYear, 2, 19)
-            },
-            {
-                id: 2,
-                name: 'Microsoft Build Developer Conference',
-                location: 'San Francisco, CA',
-                startDate: new Date(currentYear, 3, 29),
-                endDate: new Date(currentYear, 4, 1)
-            },
-            {
-                id: 3,
-                name: 'Apple Special Event',
-                location: 'San Francisco, CA',
-                startDate: new Date(currentYear, 8, 1),
-                endDate: new Date(currentYear, 8, 1)
-            },
-            {
-                id: 4,
-                name: 'Apple Keynote',
-                location: 'San Francisco, CA',
-                startDate: new Date(currentYear, 8, 9),
-                endDate: new Date(currentYear, 8, 9)
-            },
-            {
-                id: 5,
-                name: 'Chrome Developer Summit',
-                location: 'Mountain View, CA',
-                startDate: new Date(currentYear, 10, 17),
-                endDate: new Date(currentYear, 10, 18)
-            },
-            {
-                id: 6,
-                name: 'F8 2015',
-                location: 'San Francisco, CA',
-                startDate: new Date(currentYear, 2, 25),
-                endDate: new Date(currentYear, 2, 26)
-            },
-            {
-                id: 7,
-                name: 'Yahoo Mobile Developer Conference',
-                location: 'New York',
-                startDate: new Date(currentYear, 7, 25),
-                endDate: new Date(currentYear, 7, 26)
-            },
-            {
-                id: 8,
-                name: 'Android Developer Conference',
-                location: 'Santa Clara, CA',
-                startDate: new Date(currentYear, 11, 1),
-                endDate: new Date(currentYear, 11, 4)
-            },
-            {
-                id: 9,
-                name: 'LA Tech Summit',
-                location: 'Los Angeles, CA',
-                startDate: new Date(currentYear, 10, 17),
-                endDate: new Date(currentYear, 10, 17)
+        customDataSourceRenderer: function(element, date, events) {
+            if(events.length > 0) {
+                var boxShadow;
+                if (events[0].marked) {
+                    boxShadow = 'inset 0 -' + 4 + 'px 0 0 ' + markedColor;
+                } else {
+                    var boxShadow = 'inset 0 -' + 4 + 'px 0 0 ' + defaultColor;
+                }
+                element.parent().css('box-shadow', boxShadow);
             }
-        ]
+        }
     });
+}
 
+function initModal() {
     $('#save-event').click(function() {
         saveEvent();
     });
-});
+    $('#delete-event').click(function() {
+        deleteEvent();
+    });
+}
+
+function loadEntries() {
+    $.getJSON("./entries.json", function(json) {
+        var entries = asCalendarDataSource(json);
+        markEntries(entries);
+        $('#calendar').data('calendar').setDataSource(entries);
+    });
+}
+
+function asCalendarDataSource(entries) {
+    for (let i in entries) {
+        var entry = entries[i];
+        entry.id = i;
+        entry.startDate = new Date(entry.date.date)
+        entry.endDate = new Date(entry.startDate);
+    }
+    return entries;
+}
+
+function markEntries(entries) {
+    for (let i in entries) {
+        entries[i].marked = false;
+    }
+
+    for (let i in entries) {
+        var entry = entries[i];
+
+        var sameLocation = entries.filter(function (otherEntry) {
+            return otherEntry.location === entry.location;
+        });
+        var earliestMatchingDate = entry.startDate;
+        var latestMatchingDate = entry.startDate;
+        var candidatesToMark = [entry];
+
+        var sameLocationInSameWeek = 0;
+        for (let j in sameLocation) {
+            var otherEntry = sameLocation[j];
+            if (entry.startDate.getISOWeek()  == otherEntry.startDate.getISOWeek()) {
+                sameLocationInSameWeek += 1;
+                earliestMatchingDate = earliestMatchingDate.isBefore(otherEntry.startDate) ? earliestMatchingDate : otherEntry.startDate;
+                latestMatchingDate = latestMatchingDate.isAfter(otherEntry.startDate) ? latestMatchingDate : otherEntry.startDate;
+                candidatesToMark.push(otherEntry);
+            }
+        }
+
+        if (sameLocationInSameWeek >= 3) {
+            var endDate = earliestMatchingDate.clone().addDays(91);
+            for (let j in sameLocation) {
+                var otherEntry = sameLocation[j];
+                if (otherEntry.startDate.between(latestMatchingDate.clone().addDays(1), latestMatchingDate.clone().addDays(28))
+                        && otherEntry.startDate.isBefore(endDate)) {
+                    candidatesToMark.push(otherEntry);
+                    latestMatchingDate = otherEntry.startDate;
+                }
+            }
+            for (let j in candidatesToMark) {
+                candidatesToMark[j].marked = true;
+            }
+        }
+    }
+}
+
+function editEvent(event) {
+    $('#event-modal input[name="event-index"]').val(event ? event.id : '');
+    $('#event-modal input[name="event-marked"]').val(event ? event.marked : '');
+    $('#event-modal input[name="event-location"]').val(event ? event.location : '');
+    $('#event-modal input[name="event-start-date"]').datepicker('update', event ? event.startDate : '');
+    $('#event-modal input[name="event-end-date"]').datepicker('update', event ? event.endDate : '');
+    event.id ? $('#delete-event').show() : $('#delete-event').hide();
+    $('#event-modal').modal();
+}
+
+function deleteEvent() {
+    var id = $('#event-modal input[name="event-index"]').val();
+    var entries = $('#calendar').data('calendar').getDataSource();
+    for (var i in entries) {
+        if (entries[i].id == id) {
+            entries.splice(i, 1);
+            // TODO remove from database
+            break;
+        }
+    }
+    markEntries(entries);
+    $('#calendar').data('calendar').setDataSource(entries);
+    $('#event-modal').modal('hide');
+}
+
+function saveEvent() {
+    var event = {
+        id: $('#event-modal input[name="event-index"]').val(),
+        marked: $('#event-modal input[name="event-marked"]').val(),
+        location: $('#event-modal input[name="event-location"]').val(),
+        startDate: $('#event-modal input[name="event-start-date"]').datepicker('getDate'),
+        endDate: $('#event-modal input[name="event-end-date"]').datepicker('getDate')
+    }
+    var entries = $('#calendar').data('calendar').getDataSource();
+    if (event.id) {
+        for (var i in entries) {
+            if (entries[i].id == event.id) {
+                entries[i].marked = event.marked;
+                entries[i].location = event.location;
+                entries[i].startDate = event.startDate;
+                entries[i].endDate = event.endDate;
+            }
+        }
+        // TODO update in database
+    } else {
+        var newId = 0;
+        for (var i in entries) {
+            if (entries[i].id > newId) {
+                newId = entries[i].id;
+            }
+        }
+        newId++;
+        event.id = newId;
+        entries.push(event);
+        // TODO save in database
+    }
+    markEntries(entries);
+    $('#calendar').data('calendar').setDataSource(entries);
+    $('#event-modal').modal('hide');
+}

@@ -6,7 +6,6 @@ $page = new CalendarPage();
 $page->disable_caching();
 $user_id = $page->get_user_id();
 $calendar = new Calendar($user_id);
-$calendar->mark_errors();
 $page->print_as_json($calendar->entries);
 
 
@@ -58,7 +57,7 @@ class Calendar {
 	private function load_entries($user_id) {
 		$user_id = $this->mysqli->real_escape_string($user_id);
 		$result = $this->mysqli->query("
-				SELECT e.Date, l.Name AS Location, FALSE AS Marked
+				SELECT e.Date, l.Name AS Location
 				FROM `Entry` AS e
        				JOIN Location AS l
          			  ON e.Location = l.ID
@@ -85,11 +84,10 @@ class Calendar {
 
     private function array_entries_to_objects($entries) {
         foreach ($entries as $key => $entry) {
-            $entry_object = (object) $entry;
+            $entry_object = new stdClass();
             $entry_object->date = new DateTimeImmutable($entry['Date']);
             $entry_object->week = $entry_object->date->format("W");
             $entry_object->location = $entry['Location'];
-            $entry_object->marked = (bool) $entry['Marked'];
             $entries[$key] = $entry_object;
         }
         return $entries;
@@ -101,51 +99,6 @@ class Calendar {
         });
         return $entries;
     }
-
-    public function mark_errors() {
-        foreach ($this->entries as $entry) {
-            $same_location = $this->filter_location($this->entries, $entry->location);
-            $earliest_matching_entry = $entry;
-            $latest_matching_entry = $entry;
-            $candidates_to_mark = array($entry);
-
-            $same_location_in_same_week = 0;
-            foreach ($same_location as $other_entry) {
-                if ($entry->week == $other_entry->week) {
-                    $same_location_in_same_week += 1;
-                    $earliest_matching_date = min($earliest_matching_entry->date, $other_entry->date);
-                    $latest_matching_date = max($earliest_matching_entry->date, $other_entry->date);
-                    array_push($candidates_to_mark, $other_entry);
-                }
-            }
-
-            if ($same_location_in_same_week >= 3) {
-                $enddate = $earliest_matching_date->modify('+91 days');
-                foreach ($same_location as $other_entry) {
-                    if ($other_entry->date > $latest_matching_date
-                            && $other_entry->date <= $latest_matching_date->modify('+28 days')
-                            && $other_entry->date <= $enddate) {
-                        array_push($candidates_to_mark, $other_entry);
-                        $latest_matching_date = $other_entry->date;
-                    }
-                }
-                $this->mark_all($candidates_to_mark);
-            }
-        }
-    }
-
-    private function filter_location($entries, $location) {
-        array_filter($entries, function($entry) use (&$location) {
-            return $entry->location == $location;
-        });
-        return $entries;
-    }
-
-    private function mark_all($entries) {
-        foreach ($entries as $entry) {
-            $entry->marked = True;
-        }
-    }
 }
 
 
@@ -153,4 +106,3 @@ function respond($status, $status_message) {
     header("HTTP/1.1 $status $status_message");
     exit();
 }
-?>

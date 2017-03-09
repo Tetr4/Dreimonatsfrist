@@ -9,8 +9,11 @@ RewriteRule (.*) %{REQUEST_URI}/ [R=301,L]
 # replace "/kalender/123/" with "kalender/index.html"
 RewriteRule ^[0-9]+/$ calendar.html
 
-# replace "/kalender/123/entries.json" with "kalender/entries.php?user_id=123"
-RewriteRule ^([0-9]+)/entries.json$ entries.php?user_id=$1
+# replace "/kalender/123/entries/" with "kalender/entries.php?user_id=123"
+RewriteRule ^([0-9]+)/entries/$ entries.php?user_id=$1
+
+# replace "/kalender/123/entries/2017-03-07" with "kalender/entries.php?user_id=123&date=2017-03-07"
+RewriteRule ^([0-9]+)/entries/([0-9]{4}-[0-9]{2}-[0-9]{2})/$ entries.php?user_id=$1&date=$2
 
 # replace "/kalender/123/xyz.png" with "kalender/xyz.png"
 RewriteRule ^[0-9]+/(.+)$ $1

@@ -1,6 +1,8 @@
+import 'datejs';
+
 module.exports = {
     loadEntries: function(callback) {
-        $.getJSON("./entries.json", function(json) {
+        $.getJSON("./entries/", function(json) {
             var entries = asCalendarDataSource(json);
             callback(entries);
         });
@@ -22,9 +24,10 @@ module.exports = {
 function asCalendarDataSource(entries) {
     for (let i in entries) {
         var entry = entries[i];
-        entry.id = i;
-        entry.startDate = new Date(entry.date.date)
-        entry.endDate = new Date(entry.startDate);
+        entry.id = parseInt(entry.id);
+        entry.date = Date.parse(entry.date);
+        entry.startDate = entry.date;
+        entry.endDate = entry.date;
     }
     return entries;
 }

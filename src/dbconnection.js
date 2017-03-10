@@ -7,6 +7,11 @@ module.exports = {
             callback(entries);
         });
     },
+    loadLocations: function(callback) {
+        $.getJSON("../locations/", function(json) {
+            callback(json);
+        });
+    },
     addEntry: function({ entry, success, error }) {
         entry.date = entry.startDate.toString("yyyy-MM-dd");
         $.ajax({

@@ -6,6 +6,9 @@ import 'bootstrap-datepicker/dist/css/bootstrap-datepicker.css';
 import 'bootstrap-year-calendar';
 import 'bootstrap-year-calendar/js/languages/bootstrap-year-calendar.de.js';
 import 'bootstrap-year-calendar/css/bootstrap-year-calendar.css';
+import 'bootstrap-year-calendar/css/bootstrap-year-calendar.css';
+import 'bootstrap-select';
+import 'bootstrap-select/dist/css/bootstrap-select.css';
 import $ from 'jquery';
 import 'datejs';
 import style from "./style.css";
@@ -87,12 +90,19 @@ function initModal() {
     $('#delete-event').click(function() {
         deleteEvent();
     });
+    dbconnection.loadLocations(function(locations) {
+        for(let i in locations) {
+            var location = locations[i].name;
+            $('#event-location').append('<option value="'+location+'">'+location+'</option>');
+        }
+        $("#event-location").selectpicker("refresh");
+    });
 }
 
 function editEvent(event) {
     $('#event-modal input[name="event-index"]').val(event ? event.id : '');
     $('#event-modal input[name="event-marked"]').val(event ? event.marked : '');
-    $('#event-modal input[name="event-location"]').val(event ? event.location : '');
+    $('#event-modal select[id="event-location"]').selectpicker('val', event ? event.location : '');
     $('#event-modal input[name="event-start-date"]').datepicker('update', event ? event.startDate : '');
     event.id ? $('#delete-event').show() : $('#delete-event').hide();
     $('#event-modal').modal();
@@ -124,7 +134,7 @@ function saveEvent() {
     var event = {
         id: $('#event-modal input[name="event-index"]').val(),
         marked: $('#event-modal input[name="event-marked"]').val(),
-        location: $('#event-modal input[name="event-location"]').val(),
+        location: $('#event-modal select[id="event-location"]').val(),
         startDate: $('#event-modal input[name="event-start-date"]').datepicker('getDate'),
         endDate: $('#event-modal input[name="event-start-date"]').datepicker('getDate')
     }

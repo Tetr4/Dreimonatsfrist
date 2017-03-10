@@ -12,6 +12,9 @@ RewriteRule ^[0-9]+/$ calendar.html
 # replace "/kalender/locations/" with "kalender/locations.php
 RewriteRule ^locations/$ locations.php
 
+# replace "/kalender/users/" with "kalender/users.php
+RewriteRule ^users/$ users.php
+
 # replace "/kalender/123/entries/" with "kalender/entries.php?user_id=123"
 RewriteRule ^([0-9]+)/entries/$ entries.php?user_id=$1
 

@@ -12,6 +12,11 @@ module.exports = {
             callback(json);
         });
     },
+    loadUsers: function(callback) {
+        $.getJSON("./users/", function(json) {
+            callback(json);
+        });
+    },
     addEntry: function({ entry, success, error }) {
         entry.date = entry.startDate.toString("yyyy-MM-dd");
         $.ajax({

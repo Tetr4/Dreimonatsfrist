@@ -2,25 +2,25 @@ import 'datejs';
 
 module.exports = {
     loadEntries: function(callback) {
-        $.getJSON("./entries/", function(json) {
+        $.getJSON("./termine/", function(json) {
             var entries = asCalendarDataSource(json);
             callback(entries);
         });
     },
     loadLocations: function(callback) {
-        $.getJSON("../locations/", function(json) {
+        $.getJSON("../reiseziele/", function(json) {
             callback(json);
         });
     },
     loadUsers: function(callback) {
-        $.getJSON("./users/", function(json) {
+        $.getJSON("./benutzer/", function(json) {
             callback(json);
         });
     },
     addEntry: function({ entry, success, error }) {
         entry.date = entry.startDate.toString("yyyy-MM-dd");
         $.ajax({
-            url: "./entries/" + entry.date + "/",
+            url: "./termine/" + entry.date + "/",
             type: 'POST',
             data: entry,
             dataType: "text",
@@ -31,7 +31,7 @@ module.exports = {
     updateEntry: function({ entry, oldDate, success, error }) {
         entry.date = entry.startDate.toString("yyyy-MM-dd");
         $.ajax({
-            url: "./entries/" + oldDate.toString("yyyy-MM-dd") + "/",
+            url: "./termine/" + oldDate.toString("yyyy-MM-dd") + "/",
             type: 'PUT',
             data: entry,
             success: success,
@@ -41,7 +41,7 @@ module.exports = {
     deleteEntry: function({ entry, success, error }) {
         entry.date = entry.startDate.toString("yyyy-MM-dd");
         $.ajax({
-            url: "./entries/" + entry.date + "/",
+            url: "./termine/" + entry.date + "/",
             type: 'DELETE',
             success: success,
             error: error

@@ -1,13 +1,13 @@
 <?php
 ini_set('display_errors', 'On');
 
-$page = new CalendarPage();
-$page->set_headers();
-$page->disable_caching();
-$page->process_request();
+$service = new CalendarService();
+$service->set_headers();
+$service->disable_caching();
+$service->process_request();
 
 
-class CalendarPage {
+class CalendarService {
     public function set_headers() {
         header("Allow: HEAD, GET, PUT, POST, DELETE");
     }

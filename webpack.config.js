@@ -3,10 +3,13 @@ var webpack = require('webpack');
 var CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
-    entry: ["./src/app"],
+    entry: {
+        app: "./src/app",
+        users: "./src/users"
+    },
     output: {
         path: "./dist",
-        filename: "bundle.js"
+        filename: "[name].bundle.js"
     },
     plugins: [
         new webpack.ProvidePlugin({

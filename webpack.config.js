@@ -19,7 +19,8 @@ module.exports = {
         }),
         new CopyWebpackPlugin([{
             from: 'static'
-        }])
+        }]),
+        new webpack.optimize.UglifyJsPlugin()
     ],
     module: {
         loaders: [{

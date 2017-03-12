@@ -16,7 +16,7 @@
 
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title">Event</h4>
+                        <h4 class="modal-title">Reise</h4>
                     </div>
 
                     <div class="modal-body">
@@ -25,9 +25,20 @@
                         <form class="form-horizontal">
                             <div class="form-group">
                                 <label for="event-location" class="col-sm-2 control-label">Reiseziel</label>
-                                <div class="col-sm-7">
+                                <div class="col-sm-5">
                                     <select id="event-location" class="selectpicker" data-live-search="true">
                                     </select>
+                                </div>
+                                <div class="col-sm-3">
+                                    <select id="event-location-supplement" class="selectpicker" data-width="auto">
+                                        <option value=''>Kein Zusatz</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="event-comment" class="col-sm-2 control-label">Kommentar</label>
+                                <div class="col-sm-8">
+                                    <input id="event-comment" name="event-comment" type="text" class="form-control">
                                 </div>
                             </div>
                             <div class="form-group">

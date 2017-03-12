@@ -63,11 +63,11 @@ class CalendarService {
             respond(400, "Date required");
         }
         $data = $this->get_input_data();
-        if(!isset($data['location'])) {
+        if(!isset($data['location']) || !isset($data['supplement']) || !isset($data['comment'])) {
             // 400 - Bad Request
-            respond(400, "Location required");
+            respond(400, "Location, supplement (may be null) and comment (may be null) required");
         }
-        $calendar->add_entry($_GET['date'], $data['location']);
+        $calendar->add_entry($_GET['date'], $data);
     }
 
     private function put($calendar) {
@@ -76,11 +76,11 @@ class CalendarService {
             respond(400, "Date required");
         }
         $data = $this->get_input_data();
-        if(!isset($data['location']) || !isset($data['date'])) {
+        if(!isset($data['location']) || !isset($data['date']) || !isset($data['supplement']) || !isset($data['comment'])) {
             // 400 - Bad Request
-            respond(400, "New location and date required");
+            respond(400, "New location, date, supplement (may be null) and comment (may be null) required");
         }
-        $calendar->update_entry($_GET['date'], $data['date'], $data['location']);
+        $calendar->update_entry($_GET['date'], $data);
     }
 
     private function delete($calendar) {
@@ -135,7 +135,11 @@ class Calendar {
 
 	public function get_entries() {
 		$result = $this->mysqli->query("
-				SELECT e.ID AS id, e.Date AS date, l.Name AS location
+				SELECT e.ID AS id,
+                       e.Date AS date,
+                       l.Name AS location,
+                       e.LocationSupplement AS supplement,
+                       e.Comment AS comment
 				FROM `Entry` AS e
        				JOIN Location AS l
          			  ON e.Location = l.ID
@@ -164,7 +168,11 @@ class Calendar {
     public function get_entry($date) {
         $date = $this->mysqli->real_escape_string($date);
         $result = $this->mysqli->query("
-				SELECT e.ID AS id, e.Date AS date, l.Name AS location
+				SELECT e.ID AS id,
+                       e.Date AS date,
+                       l.Name AS location,
+                       e.LocationSupplement AS supplement,
+                       e.Comment AS comment
 				FROM `Entry` AS e
        				JOIN Location AS l
          			  ON e.Location = l.ID
@@ -182,12 +190,14 @@ class Calendar {
         respond(200, "Entry found", $result->fetch_assoc());
     }
 
-    public function add_entry($date, $location) {
+    public function add_entry($date, $data) {
         $date = $this->mysqli->real_escape_string($date);
-        $location_id = $this->get_location_id($location);
+        $location_id = $this->get_location_id($data['location']);
+        $supplement = $this->as_sql_null_or_nonempty_sql_string($data['supplement']);
+        $comment = $this->as_sql_null_or_nonempty_sql_string($data['comment']);
         $this->mysqli->query("
-                INSERT INTO `Entry` (`ID`, `User`, `Date`, `Location`)
-                    SELECT NULL, $this->user_id, '$date', $location_id
+                INSERT INTO `Entry` (`ID`, `User`, `Date`, `Location`, `LocationSupplement`, `Comment`)
+                    SELECT NULL, $this->user_id, '$date', $location_id, $supplement, $comment
         ");
         if ($this->mysqli->error) {
             // 500 - Internal Server Error
@@ -197,19 +207,23 @@ class Calendar {
         respond(201, "Entry created", $this->mysqli->insert_id);
     }
 
-    public function update_entry($date, $new_date, $new_location){
+    public function update_entry($date, $data){
         if(!$this->entry_exists($date)) {
             // 404 - Not Found
             respond(404, "Entry not found");
         }
         $date = $this->mysqli->real_escape_string($date);
-        $new_date = $this->mysqli->real_escape_string($new_date);
-        $new_location_id = $this->get_location_id($new_location);
+        $new_date = $this->mysqli->real_escape_string($data['date']);
+        $new_location_id = $this->get_location_id($data['location']);
+        $supplement = $this->as_sql_null_or_nonempty_sql_string($data['supplement']);
+        $comment = $this->as_sql_null_or_nonempty_sql_string($data['comment']);
         $result = $this->mysqli->query("
                 UPDATE `Entry`
                 SET
                     Date = '$new_date',
-                    Location = $new_location_id
+                    Location = $new_location_id,
+                    LocationSupplement = $supplement,
+                    Comment = $comment
                 WHERE User = $this->user_id AND Date = '$date'
         ");
         if ($this->mysqli->error) {
@@ -235,6 +249,13 @@ class Calendar {
             respond(404, "Location not found");
         }
         return $result->fetch_assoc()['ID'];
+    }
+
+    private function as_sql_null_or_nonempty_sql_string($val) {
+        if (is_null($val) || trim($val) === '') {
+            return 'NULL';
+        }
+        return "'".$this->mysqli->real_escape_string($val)."'";
     }
 
     private function entry_exists($date) {

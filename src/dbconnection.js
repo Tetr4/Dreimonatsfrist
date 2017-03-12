@@ -53,9 +53,10 @@ function asCalendarDataSource(entries) {
     for (let i in entries) {
         var entry = entries[i];
         entry.id = parseInt(entry.id);
-        entry.date = Date.parse(entry.date);
-        entry.startDate = entry.date;
-        entry.endDate = entry.date;
+        entry.startDate = Date.parse(entry.date);
+        entry.supplement = entry.supplement == null ? '' : entry.supplement;
+        entry.comment = entry.comment == null ? '' : entry.comment;
+        entry.endDate = entry.startDate;
     }
     return entries;
 }

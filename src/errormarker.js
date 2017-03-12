@@ -18,7 +18,7 @@ module.exports = {
 }
 
 function markIfRequired(startentry, entries) {
-    var entriesWithSameLocation = getEntriesWithSameLocation(entries, startentry.location);
+    var entriesWithSameLocation = getEntriesWithSameLocation(entries, startentry.location, startentry.supplement);
     var entriesWithSameWeek = getEntriesWithSameWeek(entriesWithSameLocation, startentry.startDate.getWeek());
     var warnings = [];
     var errors = [];
@@ -49,9 +49,9 @@ function markIfRequired(startentry, entries) {
     }
 }
 
-function getEntriesWithSameLocation(entries, location) {
+function getEntriesWithSameLocation(entries, location, supplement) {
     return entries.filter(function(entry) {
-        return entry.location === location;
+        return entry.location === location && entry.supplement === supplement;
     });
 }
 

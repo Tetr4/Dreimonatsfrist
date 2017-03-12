@@ -85,6 +85,11 @@ function initModal() {
     $('#delete-event').click(function() {
         deleteEvent();
     });
+    var letters = "abcdefghijklmnopqrstuvwxyz".toUpperCase().split("");
+    for (let i in letters) {
+        $('#event-location-supplement').append('<option value="'+letters[i]+'">'+letters[i]+'</option>');
+    };
+    $("#event-location-supplement").selectpicker("refresh");
     dbconnection.loadLocations(function(locations) {
         for(let i in locations) {
             var location = locations[i].name;
@@ -98,6 +103,8 @@ function editEvent(event) {
     $('#event-modal input[name="event-index"]').val(event ? event.id : '');
     $('#event-modal input[name="event-marked"]').val(event ? event.marked : errormarker.NONE);
     $('#event-modal select[id="event-location"]').selectpicker('val', event ? event.location : '');
+    $('#event-modal select[id="event-location-supplement"]').selectpicker('val', event ? event.supplement : '');
+    $('#event-modal input[name="event-comment"]').val(event ? event.comment : '');
     $('#event-modal input[name="event-start-date"]').datepicker('update', event ? event.startDate : '');
     event.id ? $('#delete-event').show() : $('#delete-event').hide();
     $('#event-modal').modal();
@@ -130,6 +137,8 @@ function saveEvent() {
         id: $('#event-modal input[name="event-index"]').val(),
         marked: $('#event-modal input[name="event-marked"]').val(),
         location: $('#event-modal select[id="event-location"]').val(),
+        supplement: $('#event-modal select[id="event-location-supplement"]').val(),
+        comment: $('#event-modal input[name="event-comment"]').val().trim(),
         startDate: $('#event-modal input[name="event-start-date"]').datepicker('getDate'),
         endDate: $('#event-modal input[name="event-start-date"]').datepicker('getDate')
     }
@@ -143,6 +152,8 @@ function saveEvent() {
                     success: function() {
                         entries[i].marked = event.marked;
                         entries[i].location = event.location;
+                        entries[i].supplement = event.supplement;
+                        entries[i].comment = event.comment;
                         entries[i].startDate = event.startDate;
                         entries[i].endDate = event.startDate;
                         marker.markErrors(entries);

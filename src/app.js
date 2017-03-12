@@ -15,8 +15,11 @@ import style from "./style.css";
 import dbconnection from './dbconnection';
 import marker from './errormarker';
 
-var markedColor = 'rgb(255, 50, 50)';
-var defaultColor = 'rgb(30, 200, 20)';
+
+const markToColor = [];
+markToColor[marker.NONE] = 'rgb(30, 200, 20)';
+markToColor[marker.WARN] = 'rgb(255, 150, 0)';
+markToColor[marker.ERROR] = 'rgb(255, 50, 50)';
 
 $(function() {
     initCalendar();
@@ -46,7 +49,7 @@ function initCalendar() {
             if (e.events.length > 0) {
                 var content = '';
 
-                var color = e.events[0].marked ? markedColor : defaultColor;
+                var color = markToColor[e.events[0].marked];
                 content += '<div class="event-tooltip-content">' +
                     '<div class="event-name" style="color:' + color + '">' + e.events[0].location + '</div>' +
                     '</div>';
@@ -72,11 +75,8 @@ function initCalendar() {
         customDataSourceRenderer: function(element, date, events) {
             if(events.length > 0) {
                 var boxShadow;
-                if (events[0].marked) {
-                    boxShadow = 'inset 0 -' + 4 + 'px 0 0 ' + markedColor;
-                } else {
-                    var boxShadow = 'inset 0 -' + 4 + 'px 0 0 ' + defaultColor;
-                }
+                var color = markToColor[events[0].marked];
+                var boxShadow = 'inset 0 -' + 4 + 'px 0 0 ' + color;
                 element.parent().css('box-shadow', boxShadow);
             }
         }
@@ -101,7 +101,7 @@ function initModal() {
 
 function editEvent(event) {
     $('#event-modal input[name="event-index"]').val(event ? event.id : '');
-    $('#event-modal input[name="event-marked"]').val(event ? event.marked : '');
+    $('#event-modal input[name="event-marked"]').val(event ? event.marked : errormarker.NONE);
     $('#event-modal select[id="event-location"]').selectpicker('val', event ? event.location : '');
     $('#event-modal input[name="event-start-date"]').datepicker('update', event ? event.startDate : '');
     event.id ? $('#delete-event').show() : $('#delete-event').hide();
@@ -168,7 +168,6 @@ function saveEvent() {
                 event.id = newId;
                 entries.push(event);
                 marker.markErrors(entries);
-                console.log(entries);
                 $('#calendar').data('calendar').setDataSource(entries);
                 $('#event-modal').modal('hide');
             },

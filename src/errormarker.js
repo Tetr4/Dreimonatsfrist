@@ -1,50 +1,50 @@
+const NONE = "NONE";
+const WARN = "WARN";
+const ERROR = "ERROR";
+
 module.exports = {
     markErrors: function(entries) {
-        unmarkAll(entries);
+        markAll(entries, NONE);
         for (let i in entries) {
-            markIfRequired(entries[i], entries);
+             // ignore entries that were marked by other calls to markIfRequired()
+            if (entries[i].marked == NONE) {
+                markIfRequired(entries[i], entries);
+            }
         }
-    }
+    },
+    NONE: NONE,
+    WARN: WARN,
+    ERROR: ERROR
 }
 
-function unmarkAll(entries) {
-    for (let i in entries) {
-        entries[i].marked = false;
-    }
-}
-
-function markIfRequired(entry, entries) {
-    var entriesWithSameLocation = getEntriesWithSameLocation(entries, entry.location);
-    var entriesWithSameWeek = getEntriesWithSameWeek(entriesWithSameLocation, entry.startDate.getISOWeek());
+function markIfRequired(startentry, entries) {
+    var entriesWithSameLocation = getEntriesWithSameLocation(entries, startentry.location);
+    var entriesWithSameWeek = getEntriesWithSameWeek(entriesWithSameLocation, startentry.startDate.getWeek());
+    var warnings = [];
+    var errors = [];
 
     // mark if there are at least 3 entries for same location in same week
     if (entriesWithSameWeek.length >= 3) {
-        markAll(entriesWithSameWeek);
+        markAll(entriesWithSameWeek, WARN);
 
-        // mark dates up to 91 days from the earliest marked date
         sortByDate(entriesWithSameWeek);
         var earliestInWeek = entriesWithSameWeek[0].startDate;
         var latestInWeek = entriesWithSameWeek[entriesWithSameWeek.length-1].startDate;
-        var followingEntriesEnd = earliestInWeek.clone().addDays(91);
-        markFollowing(entriesWithSameLocation, latestInWeek, followingEntriesEnd);
-    }
-}
+        var errorAfterDate = earliestInWeek.clone().addDays(91);
 
-function markFollowing(entries, latestMarkedDate, followingEntriesEnd) {
-    var followingEntriesStart = latestMarkedDate.clone().addDays(1);
-    var followingEntries = getEntriesBetweenDates(entries, followingEntriesStart, followingEntriesEnd);
-
-    // step through following dates and repeatedly mark if within 28 days after last marked date
-    sortByDate(followingEntries);
-    for (let i in followingEntries) {
-        var nextEntry = followingEntries[i];
-        var rangeStart = latestMarkedDate.clone().addDays(1);
-        var rangeEnd = latestMarkedDate.clone().addDays(28);
-        if (nextEntry.startDate.between(rangeStart, rangeEnd)) {
-            nextEntry.marked = true;
+        // step through following dates and repeatedly mark if within 28 days after last marked date
+        var latestMarkedDate = latestInWeek;
+        var followingEntries = getEntriesAfterDate(entriesWithSameLocation, latestMarkedDate);
+        sortByDate(followingEntries);
+        for (let i in followingEntries) {
+            var nextEntry = followingEntries[i];
+            var stepEndDate = latestMarkedDate.clone().addDays(28);
+            if (! nextEntry.startDate.isBefore(stepEndDate)) {
+                // more than 28 days after last marked date
+                break;
+            }
+            nextEntry.marked = nextEntry.startDate.isBefore(errorAfterDate) ? WARN : ERROR;
             latestMarkedDate = nextEntry.startDate;
-        } else {
-            break;
         }
     }
 }
@@ -57,24 +57,24 @@ function getEntriesWithSameLocation(entries, location) {
 
 function getEntriesWithSameWeek(entries, week) {
     return entries.filter(function(entry) {
-        return entry.startDate.getISOWeek() === week;
+        return entry.startDate.getWeek() === week;
     });
 }
 
 function sortByDate(entries) {
     entries.sort(function(entry, otherEntry) {
-        return entry.startDate.isAfter(otherEntry.startDate);
+        return Date.compare(entry.startDate, otherEntry.startDate);
     });
 }
 
-function markAll(entries) {
+function markAll(entries, type) {
     for (let i in entries) {
-        entries[i].marked = true;
+        entries[i].marked = type;
     }
 }
 
-function getEntriesBetweenDates(entries, start, end) {
+function getEntriesAfterDate(entries, start) {
     return entries.filter(function(entry) {
-        return entry.startDate.between(start, end);
+        return entry.startDate.isAfter(start);
     })
 }

@@ -14,12 +14,8 @@ import 'datejs';
 import style from "./style.css";
 import dbconnection from './dbconnection';
 import marker from './errormarker';
+import colors from './colors';
 
-
-const markToColor = [];
-markToColor[marker.NONE] = 'rgb(30, 200, 20)';
-markToColor[marker.WARN] = 'rgb(255, 150, 0)';
-markToColor[marker.ERROR] = 'rgb(255, 50, 50)';
 
 $(function() {
     initCalendar();
@@ -49,7 +45,7 @@ function initCalendar() {
             if (e.events.length > 0) {
                 var content = '';
 
-                var color = markToColor[e.events[0].marked];
+                var color = colors.fromMark[e.events[0].marked];
                 content += '<div class="event-tooltip-content">' +
                     '<div class="event-name" style="color:' + color + '">' + e.events[0].location + '</div>' +
                     '</div>';
@@ -74,9 +70,8 @@ function initCalendar() {
         },
         customDataSourceRenderer: function(element, date, events) {
             if(events.length > 0) {
-                var boxShadow;
-                var color = markToColor[events[0].marked];
-                var boxShadow = 'inset 0 -' + 4 + 'px 0 0 ' + color;
+                var shadowColor = colors.fromMark[events[0].marked];
+                var boxShadow = 'inset 0 -' + 4 + 'px 0 0 ' + shadowColor;
                 element.parent().css('box-shadow', boxShadow);
             }
         }

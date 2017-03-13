@@ -38,7 +38,7 @@ function markIfRequired(startentry, entries) {
         sortByDate(followingEntries);
         for (let i in followingEntries) {
             var nextEntry = followingEntries[i];
-            var stepEndDate = latestMarkedDate.clone().addDays(28);
+            var stepEndDate = latestMarkedDate.clone().addDays(29);
             if (! nextEntry.startDate.isBefore(stepEndDate)) {
                 // more than 28 days after last marked date
                 break;

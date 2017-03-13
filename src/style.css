@@ -1,1 +1,73 @@
+body {
+    text-align: center;
+    font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+    height: 101%;
+    font-size: 13px;
+}
 
+.ueberschrift {
+    font-weight: 500;
+    font-size: 36px;
+    margin-top: 40px;
+    margin-bottom: 20px;
+    line-height: 1.1;
+    text-align: left;
+}
+
+button {
+    background-color: #F6F6F6;
+    border: 1px solid #ddd;
+    padding: 4px;
+    font-size: 15px;
+    width: 100px;
+    border-radius: 4px;
+    box-shadow: 0 0.5px 0.5px rgba(0, 0, 0, .05);
+}
+
+button:hover {
+    cursor: pointer;
+}
+
+.container {
+    width: 1160px;
+    margin: 0 auto;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+#maincontent {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+    margin: 0 auto;
+    padding: 2%
+}
+
+#mitarbeiter_suche {
+    padding: 7px;
+    text-align: center;
+    width: 60%;
+    margin-bottom: 20px;
+    margin-right: 10px;
+    font-size: 15px;
+    color: #aaaaaa;
+}
+
+#mitarbeiterausgabe {
+    width: 100%;
+    text-align: center;
+    border-collapse: collapse;
+}
+
+#mitarbeiterausgabe th {
+    color: #aaaaaa;
+    width: 16.6%;
+    text-align: center;
+    border: 1px solid #eee;
+    padding: 10px;
+}
+
+#mitarbeiterausgabe td {
+    border: 1px solid #eee;
+    padding: 5px;
+}

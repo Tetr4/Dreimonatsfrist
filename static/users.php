@@ -46,7 +46,14 @@ class Users {
 	}
 
 	public function get() {
-		$result = $this->mysqli->query("SELECT ID AS id, Name AS name From `User`");
+		$result = $this->mysqli->query("
+                SELECT ID AS id,
+                       Name AS name,
+                       Vorname AS vorname,
+                       Firma AS firma,
+                       Kostenstelle AS kostenstelle
+               FROM `User`
+        ");
 		if ($this->mysqli->error) {
 			// 500 - Internal Server Error
 			respond(500, "Error: " . $this->mysqli->error);

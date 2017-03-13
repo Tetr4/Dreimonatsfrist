@@ -11,7 +11,6 @@ import 'bootstrap-select';
 import 'bootstrap-select/dist/css/bootstrap-select.css';
 import $ from 'jquery';
 import 'datejs';
-import style from "./style.css";
 import dbconnection from './dbconnection';
 import marker from './errormarker';
 import colors from './colors';

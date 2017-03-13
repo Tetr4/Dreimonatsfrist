@@ -1,7 +1,7 @@
 import 'babel-polyfill';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
-import style from "./style.css";
+import "./user.css";
 import dbconnection from './dbconnection';
 
 var users;

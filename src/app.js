@@ -11,6 +11,7 @@ import 'bootstrap-select';
 import 'bootstrap-select/dist/css/bootstrap-select.css';
 import $ from 'jquery';
 import 'datejs';
+import "./app.css";
 import dbconnection from './dbconnection';
 import marker from './errormarker';
 import colors from './colors';
@@ -43,10 +44,15 @@ function initCalendar() {
         mouseOnDay: function(e) {
             if (e.events.length > 0) {
                 var content = '';
-
-                var color = colors.fromMark[e.events[0].marked];
+                var entry = e.events[0];
+                var color = colors.fromMark[entry.marked];
+                var location = entry.location;
+                if (entry.supplement) {
+                    location = location + ' - ' + entry.supplement;
+                }
                 content += '<div class="event-tooltip-content">' +
-                    '<div class="event-name" style="color:' + color + '">' + e.events[0].location + '</div>' +
+                    '<div class="tooltip-location" style="color:' + color + '">' + location + '</div>' +
+                    '<div class="tooltip-comment">' + entry.comment + '</div>' +
                     '</div>';
 
                 $(e.element).popover({

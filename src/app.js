@@ -48,7 +48,7 @@ function initCalendar() {
         mouseOnDay: function(e) {
             if (e.events.length > 0) {
                 var entry = e.events[0];
-                var color = colors.fromMark[entry.marked];
+                var color = colors.fromMark[entry.mark];
                 var content = tooltip(color, entry).html();
 
                 $(e.element).popover({
@@ -71,7 +71,7 @@ function initCalendar() {
         },
         customDataSourceRenderer: function(element, date, events) {
             if(events.length > 0) {
-                var shadowColor = colors.fromMark[events[0].marked];
+                var shadowColor = colors.fromMark[events[0].mark];
                 var boxShadow = 'inset 0 -' + 4 + 'px 0 0 ' + shadowColor;
                 element.parent().css('box-shadow', boxShadow);
             }
@@ -104,7 +104,7 @@ function initModal() {
 
 function editEvent(event) {
     $('#event-modal input[name="event-index"]').val(event ? event.id : '');
-    $('#event-modal input[name="event-marked"]').val(event ? event.marked : errormarker.NONE);
+    $('#event-modal input[name="event-mark"]').val(event ? event.mark : errormarker.NONE);
     $('#event-modal select[id="event-location"]').selectpicker('val', event ? event.location : '');
     $('#event-modal select[id="event-location-supplement"]').selectpicker('val', event ? event.supplement : '');
     $('#event-modal input[name="event-comment"]').val(event ? event.comment : '');
@@ -138,7 +138,7 @@ function deleteEvent() {
 function saveEvent() {
     var event = {
         id: $('#event-modal input[name="event-index"]').val(),
-        marked: $('#event-modal input[name="event-marked"]').val(),
+        mark: $('#event-modal input[name="event-mark"]').val(),
         location: $('#event-modal select[id="event-location"]').val(),
         supplement: $('#event-modal select[id="event-location-supplement"]').val(),
         comment: $('#event-modal input[name="event-comment"]').val().trim(),
@@ -153,7 +153,7 @@ function saveEvent() {
                     entry: event,
                     oldDate: entries[i].startDate,
                     success: function() {
-                        entries[i].marked = event.marked;
+                        entries[i].mark = event.mark;
                         entries[i].location = event.location;
                         entries[i].supplement = event.supplement;
                         entries[i].comment = event.comment;

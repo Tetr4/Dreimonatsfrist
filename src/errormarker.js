@@ -7,7 +7,7 @@ module.exports = {
         markAll(entries, NONE);
         for (let i in entries) {
              // ignore entries that were marked by other calls to markIfRequired()
-            if (entries[i].marked == NONE) {
+            if (entries[i].mark == NONE) {
                 markIfRequired(entries[i], entries);
             }
         }
@@ -48,7 +48,7 @@ function markIfRequired(startentry, entries) {
                 // more than 29 days after last marked date
                 break;
             }
-            nextEntry.marked = nextEntry.startDate.isBefore(errorAfterDate) ? WARN : ERROR;
+            nextEntry.mark = nextEntry.startDate.isBefore(errorAfterDate) ? WARN : ERROR;
             latestMarkedDate = nextEntry.startDate;
         }
     }
@@ -74,7 +74,7 @@ function sortByDate(entries) {
 
 function markAll(entries, type) {
     for (let i in entries) {
-        entries[i].marked = type;
+        entries[i].mark = type;
     }
 }
 

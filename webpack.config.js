@@ -8,7 +8,7 @@ module.exports = {
         users: "./src/users"
     },
     output: {
-        path: "./dist",
+        path: __dirname + "/dist",
         filename: "[name].bundle.js"
     },
     plugins: [
@@ -19,8 +19,7 @@ module.exports = {
         }),
         new CopyWebpackPlugin([{
             from: 'static'
-        }]),
-        new webpack.optimize.UglifyJsPlugin()
+        }])
     ],
     module: {
         loaders: [{

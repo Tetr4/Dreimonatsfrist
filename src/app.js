@@ -6,7 +6,6 @@ import 'bootstrap-datepicker/dist/css/bootstrap-datepicker.css';
 import 'bootstrap-year-calendar';
 import 'bootstrap-year-calendar/js/languages/bootstrap-year-calendar.de.js';
 import 'bootstrap-year-calendar/css/bootstrap-year-calendar.css';
-import 'bootstrap-year-calendar/css/bootstrap-year-calendar.css';
 import 'bootstrap-select';
 import 'bootstrap-select/dist/css/bootstrap-select.css';
 import $ from 'jquery';
@@ -72,7 +71,7 @@ function initCalendar() {
             $(e.element).popover('hide');
         },
         customDataSourceRenderer: function(element, date, events) {
-            if(events.length > 0) {
+            if (events.length > 0) {
                 var shadowColor = colors.fromMark[events[0].mark];
                 var boxShadow = 'inset 0 -' + 4 + 'px 0 0 ' + shadowColor;
                 element.parent().css('box-shadow', boxShadow);
@@ -95,7 +94,7 @@ function initModal() {
     };
     $("#event-location-supplement").selectpicker("refresh");
     dbconnection.loadLocations(function(locations) {
-        for(let i in locations) {
+        for (let i in locations) {
             var location = locations[i].name;
             var option = $('<option>').val(location).text(location);
             $('#event-location').append(option);

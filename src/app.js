@@ -22,7 +22,9 @@ $(function() {
     initCalendar();
     initModal();
     dbconnection.loadUser(function(user) {
-        $('#user-name').text("Kalender von " + user.vorname + " " + user.name);
+        var title = "Kalender von " + user.vorname + " " + user.name;
+        $('#user-name').text(title);
+        $(document).attr("title", title);
     });
     dbconnection.loadEntries(function(entries) {
         marker.markErrors(entries);

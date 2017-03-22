@@ -14,6 +14,7 @@ import 'datejs';
 import "./app.css";
 import dbconnection from './dbconnection';
 import marker from './errormarker';
+import tooltip from './tooltip';
 import colors from './colors';
 
 
@@ -46,17 +47,9 @@ function initCalendar() {
         },
         mouseOnDay: function(e) {
             if (e.events.length > 0) {
-                var content = '';
                 var entry = e.events[0];
                 var color = colors.fromMark[entry.marked];
-                var location = entry.location;
-                if (entry.supplement) {
-                    location = location + ' - ' + entry.supplement;
-                }
-                content += '<div class="event-tooltip-content">' +
-                    '<div class="tooltip-location" style="color:' + color + '">' + location + '</div>' +
-                    '<div class="tooltip-comment">' + entry.comment + '</div>' +
-                    '</div>';
+                var content = tooltip(color, entry).html();
 
                 $(e.element).popover({
                     trigger: 'manual',
@@ -95,13 +88,15 @@ function initModal() {
     });
     var letters = "abcdefghijklmnopqrstuvwxyz".toUpperCase().split("");
     for (let i in letters) {
-        $('#event-location-supplement').append('<option value="'+letters[i]+'">'+letters[i]+'</option>');
+        var option = $('<option>').val(letters[i]).text(letters[i]);
+        $('#event-location-supplement').append(option);
     };
     $("#event-location-supplement").selectpicker("refresh");
     dbconnection.loadLocations(function(locations) {
         for(let i in locations) {
             var location = locations[i].name;
-            $('#event-location').append('<option value="'+location+'">'+location+'</option>');
+            var option = $('<option>').val(location).text(location);
+            $('#event-location').append(option);
         }
         $("#event-location").selectpicker("refresh");
     });

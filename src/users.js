@@ -27,12 +27,14 @@ function showUsers(users) {
     $('#mitarbeiterausgabe tr:not(:first)').remove();
     for (let i in users) {
         var row = $('<tr>');
-        row.append('<td>' + users[i].name + '</td>');
-        row.append('<td>' + users[i].vorname + '</td>');
-        row.append('<td>' + users[i].id + '</td>');
-        row.append('<td>' + users[i].firma + '</td>');
-        row.append('<td>' + users[i].kostenstelle + '</td>');
-        row.append("<td><button type='button' onclick=\"location.href='./" + users[i].id + "/';\">ausw&auml;hlen</button></td>");
+        row.append($('<td>').text(users[i].name));
+        row.append($('<td>').text(users[i].vorname));
+        row.append($('<td>').text(users[i].id));
+        row.append($('<td>').text(users[i].firma));
+        row.append($('<td>').text(users[i].kostenstelle));
+        var button = $('<a class="btn btn-primary" role="button">Auswählen</a>')
+                .attr("href","./" + users[i].id);
+        row.append($('<td>').append(button));
         $('#mitarbeiterausgabe').append(row);
     }
 }

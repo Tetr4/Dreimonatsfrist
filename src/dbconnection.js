@@ -17,6 +17,13 @@ module.exports = {
             callback(json);
         });
     },
+    loadUser: function(callback) {
+        var pathSegments = window.location.pathname.split('/');
+        var userId = pathSegments.pop() || pathSegments.pop(); // trailing slash
+        $.getJSON("../benutzer/"+userId, function(json) {
+            callback(json);
+        });
+    },
     addEntry: function({ entry, success, error }) {
         entry.date = entry.startDate.toString("yyyy-MM-dd");
         $.ajax({

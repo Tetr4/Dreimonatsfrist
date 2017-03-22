@@ -16,7 +16,11 @@ class UsersService {
         $users = new Users();
         switch ($_SERVER['REQUEST_METHOD']) {
             case 'GET':
-                $users->get_all();
+                if (isset($_GET['user_id'])) {
+                    $users->get($_GET['user_id']);
+                } else {
+                    $users->get_all();
+                }
                 break;
             default:
                 // 405 - Method Not Allowed
@@ -46,6 +50,28 @@ class Users extends DatabaseConnection {
         // 200 - OK
 		respond(200, "Users found", $this->sql_result_to_array($result));
 	}
+
+    public function get($user_id) {
+		$user_id = $this->mysqli->real_escape_string($user_id);
+        $result = $this->mysqli->query("
+                SELECT ID AS id,
+                       Name AS name,
+                       Vorname AS vorname,
+                       Firma AS firma,
+                       Kostenstelle AS kostenstelle
+               FROM `User` WHERE ID = $user_id
+        ");
+        if ($this->mysqli->error) {
+            // 500 - Internal Server Error
+            respond(500, "Error: " . $this->mysqli->error);
+        }
+        if($result->num_rows === 0) {
+            // 404 - Not Found
+            respond(404, "User not found");
+        }
+        // 200 - OK
+        respond(200, "User found", $result->fetch_assoc());
+    }
 }
 
 $service = new UsersService();

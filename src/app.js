@@ -20,6 +20,9 @@ import colors from './colors';
 $(function() {
     initCalendar();
     initModal();
+    dbconnection.loadUser(function(user) {
+        $('#user-name').text("Kalender von " + user.vorname + " " + user.name);
+    });
     dbconnection.loadEntries(function(entries) {
         marker.markErrors(entries);
         $('#calendar').data('calendar').setDataSource(entries);

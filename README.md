@@ -6,6 +6,24 @@ Calendar that automatically marks dates, regarding time limits for travel expens
 Kalendar der automatisch Reisetermine markiert, die außerhalb der Dreimonatsfrist bezüglich Abzug der Verpflegungsmehraufwendungen liegen.  
 Siehe [§ 9 Abs. 4a Sätze 6 und 7 EStG](https://www.gesetze-im-internet.de/estg/__9.html).
 
+![Recording](https://cloud.githubusercontent.com/assets/3826929/24224516/d42be88c-0f5b-11e7-959e-1458500b3a4f.gif)
+
+
+## Building
+Download dependencies:
+```sh
+$ npm install
+```
+
+Build production (minified):
+```sh
+$ npm run build
+```
+
+Automatically build on save:
+```sh
+$ npm run watch
+```
 
 ## Database Format
 The database is accessed via restful queries (see [dbconnection.js](src/dbconnection.js)).

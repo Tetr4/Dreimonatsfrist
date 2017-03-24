@@ -2,27 +2,30 @@ AddDefaultCharset UTF-8
 RewriteEngine on
 RewriteBase /kalender
 
-# enforce trailing slash so "kalender/2" is redirected to "kalender/2/"
+# redirect "kalender/2" to "kalender/2/" (enforce trailing slash)
 RewriteCond %{REQUEST_URI} !(/$|\.)
 RewriteRule (.*) %{REQUEST_URI}/ [R=301,L]
 
-# replace "/kalender/123/" with "kalendar/calendar.html"
+# respond to "/kalender/" with "kalendar/userlist.html"
+RewriteRule ^$ userlist.html
+
+# respond to "/kalender/123/" with "kalendar/calendar.html"
 RewriteRule ^[0-9]+/$ calendar.html
 
-# replace "/kalender/reiseziele/" with "kalender/locations.php
+# respond to "/kalender/reiseziele/" with "kalender/locations.php
 RewriteRule ^reiseziele/$ locations.php
 
-# replace "/kalender/benutzer/" with "kalender/users.php
+# respond to "/kalender/benutzer/" with "kalender/users.php
 RewriteRule ^benutzer/$ users.php
 
-# replace "/kalender/benutzer/123" with "kalender/users.php?user_id=123
+# respond to "/kalender/benutzer/123" with "kalender/users.php?user_id=123
 RewriteRule ^benutzer/([0-9]+)/$ users.php?user_id=$1
 
-# replace "/kalender/123/termine/" with "kalender/entries.php?user_id=123"
+# respond to "/kalender/123/termine/" with "kalender/entries.php?user_id=123"
 RewriteRule ^([0-9]+)/termine/$ entries.php?user_id=$1
 
-# replace "/kalender/123/termine/2017-03-07" with "kalender/entries.php?user_id=123&date=2017-03-07"
+# respond to "/kalender/123/termine/2017-03-07" with "kalender/entries.php?user_id=123&date=2017-03-07"
 RewriteRule ^([0-9]+)/termine/([0-9]{4}-[0-9]{2}-[0-9]{2})/$ entries.php?user_id=$1&date=$2
 
-# replace "/kalender/123/xyz.png" with "kalender/xyz.png"
+# respond to "/kalender/123/xyz.png" with "kalender/xyz.png"
 RewriteRule ^[0-9]+/(.+)$ $1

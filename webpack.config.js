@@ -4,8 +4,8 @@ var CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
     entry: {
-        app: "./src/app",
-        users: "./src/users"
+        calendar: "./app/js/calendar",
+        userlist: "./app/js/userlist"
     },
     output: {
         path: __dirname + "/dist",
@@ -17,9 +17,10 @@ module.exports = {
             jQuery: "jquery",
             'window.jQuery': 'jquery'
         }),
-        new CopyWebpackPlugin([{
-            from: 'static'
-        }])
+        new CopyWebpackPlugin([
+            { from: './static' },
+            { from: './service' },
+        ])
     ],
     module: {
         loaders: [{

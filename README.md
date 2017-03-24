@@ -26,9 +26,9 @@ $ npm run watch
 ```
 
 ## Database Format
-The database is accessed via restful queries (see [dbconnection.js](src/dbconnection.js)).
+The database is accessed via restful queries (see [dbconnection.js](app/js/dbconnection.js)).
 
-When using the MySQL webservices ([entries.php](static/entries.php), [locations.php](static/locations.php), [users.php](static/users.php)), the database should look like this:
+When using the MySQL webservices ([entries.php](service/entries.php), [locations.php](service/locations.php), [users.php](service/users.php)), the database should look like this:
 
 ```SQL
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";

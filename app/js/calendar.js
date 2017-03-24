@@ -10,12 +10,11 @@ import 'bootstrap-select';
 import 'bootstrap-select/dist/css/bootstrap-select.css';
 import $ from 'jquery';
 import 'datejs';
-import "./app.css";
+import "../css/calendar.css";
 import dbconnection from './dbconnection';
 import marker from './errormarker';
 import tooltip from './tooltip';
 import colors from './colors';
-
 
 $(function() {
     initCalendar();

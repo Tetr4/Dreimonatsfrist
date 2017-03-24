@@ -17,9 +17,12 @@ module.exports = {
             jQuery: "jquery",
             'window.jQuery': 'jquery'
         }),
-        new CopyWebpackPlugin([
-            { from: './static' },
-            { from: './service' },
+        new CopyWebpackPlugin([{
+                from: './static'
+            },
+            {
+                from: './service'
+            },
         ])
     ],
     module: {

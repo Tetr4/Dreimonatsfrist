@@ -6,7 +6,7 @@ module.exports = {
     markErrors: function(entries) {
         markAll(entries, NONE);
         for (let i in entries) {
-             // ignore entries that were marked by other calls to markIfRequired()
+            // ignore entries that were marked by other calls to markIfRequired()
             if (entries[i].mark == NONE) {
                 markIfRequired(entries[i], entries);
             }
@@ -18,19 +18,19 @@ module.exports = {
 }
 
 function markIfRequired(startentry, entries) {
-    var entriesWithSameLocation = getEntriesWithSameLocation(entries, startentry.location, startentry.supplement);
-    var entriesWithSameWeek = getEntriesWithSameWeek(entriesWithSameLocation, startentry.startDate.getWeek());
-    var warnings = [];
-    var errors = [];
+    const entriesWithSameLocation = getEntriesWithSameLocation(entries, startentry.location, startentry.supplement);
+    const entriesWithSameWeek = getEntriesWithSameWeek(entriesWithSameLocation, startentry.startDate.getWeek());
+    const warnings = [];
+    const errors = [];
 
     // mark if there are at least 3 entries for same location in same week
     if (entriesWithSameWeek.length >= 3) {
         markAll(entriesWithSameWeek, WARN);
 
         sortByDate(entriesWithSameWeek);
-        var earliestInWeek = entriesWithSameWeek[0].startDate;
-        var latestInWeek = entriesWithSameWeek[entriesWithSameWeek.length-1].startDate;
-        var errorAfterDate = earliestInWeek.clone().addMonths(3);
+        const earliestInWeek = entriesWithSameWeek[0].startDate;
+        const latestInWeek = entriesWithSameWeek[entriesWithSameWeek.length - 1].startDate;
+        const errorAfterDate = earliestInWeek.clone().addMonths(3);
         if (errorAfterDate.getDate() < earliestInWeek.getDate()) {
             // if following month doesn't have enough dates, the required date is the first of the next month.
             // e.g. 3 months after 30-11-2016 is 28-02-2017, as 30-02-2017 doesn't exist, so the required date is 01-03-2017
@@ -39,12 +39,12 @@ function markIfRequired(startentry, entries) {
 
         // step through following dates and repeatedly mark if within 28 days after last marked date
         var latestMarkedDate = latestInWeek;
-        var followingEntries = getEntriesAfterDate(entriesWithSameLocation, latestMarkedDate);
+        const followingEntries = getEntriesAfterDate(entriesWithSameLocation, latestMarkedDate);
         sortByDate(followingEntries);
         for (let i in followingEntries) {
-            var nextEntry = followingEntries[i];
-            var stepEndDate = latestMarkedDate.clone().addDays(29);
-            if (! nextEntry.startDate.isBefore(stepEndDate)) {
+            const nextEntry = followingEntries[i];
+            const stepEndDate = latestMarkedDate.clone().addDays(29);
+            if (!nextEntry.startDate.isBefore(stepEndDate)) {
                 // more than 29 days after last marked date
                 break;
             }
@@ -81,5 +81,5 @@ function markAll(entries, type) {
 function getEntriesAfterDate(entries, start) {
     return entries.filter(function(entry) {
         return entry.startDate.isAfter(start);
-    })
+    });
 }

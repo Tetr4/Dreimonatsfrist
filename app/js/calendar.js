@@ -16,11 +16,12 @@ import marker from './errormarker';
 import tooltip from './tooltip';
 import colors from './colors';
 
+
 $(function() {
     initCalendar();
     initModal();
     dbconnection.loadUser(function(user) {
-        var title = "Kalender von " + user.vorname + " " + user.name;
+        const title = "Kalender von " + user.vorname + " " + user.name;
         $('#user-name').text(title);
         $(document).attr("title", title);
     });
@@ -47,9 +48,9 @@ function initCalendar() {
         },
         mouseOnDay: function(e) {
             if (e.events.length > 0) {
-                var entry = e.events[0];
-                var color = colors.fromMark[entry.mark];
-                var content = tooltip(color, entry).html();
+                const entry = e.events[0];
+                const color = colors.fromMark[entry.mark];
+                const content = tooltip(color, entry).html();
 
                 $(e.element).popover({
                     trigger: 'manual',
@@ -71,8 +72,8 @@ function initCalendar() {
         },
         customDataSourceRenderer: function(element, date, events) {
             if (events.length > 0) {
-                var shadowColor = colors.fromMark[events[0].mark];
-                var boxShadow = 'inset 0 -' + 4 + 'px 0 0 ' + shadowColor;
+                const shadowColor = colors.fromMark[events[0].mark];
+                const boxShadow = 'inset 0 -' + 4 + 'px 0 0 ' + shadowColor;
                 element.parent().css('box-shadow', boxShadow);
             }
         }
@@ -86,16 +87,16 @@ function initModal() {
     $('#delete-event').click(function() {
         deleteEvent();
     });
-    var letters = "abcdefghijklmnopqrstuvwxyz".toUpperCase().split("");
+    const letters = "abcdefghijklmnopqrstuvwxyz".toUpperCase().split("");
     for (let i in letters) {
-        var option = $('<option>').val(letters[i]).text(letters[i]);
+        const option = $('<option>').val(letters[i]).text(letters[i]);
         $('#event-location-supplement').append(option);
     };
     $("#event-location-supplement").selectpicker("refresh");
     dbconnection.loadLocations(function(locations) {
         for (let i in locations) {
-            var location = locations[i].name;
-            var option = $('<option>').val(location).text(location);
+            const location = locations[i].name;
+            const option = $('<option>').val(location).text(location);
             $('#event-location').append(option);
         }
         $("#event-location").selectpicker("refresh");
@@ -114,8 +115,8 @@ function editEvent(event) {
 }
 
 function deleteEvent() {
-    var id = $('#event-modal input[name="event-index"]').val();
-    var entries = $('#calendar').data('calendar').getDataSource();
+    const id = $('#event-modal input[name="event-index"]').val();
+    const entries = $('#calendar').data('calendar').getDataSource();
     for (let i in entries) {
         if (entries[i].id == id) {
             dbconnection.deleteEntry({
@@ -136,7 +137,7 @@ function deleteEvent() {
 }
 
 function saveEvent() {
-    var event = {
+    const event = {
         id: $('#event-modal input[name="event-index"]').val(),
         mark: $('#event-modal input[name="event-mark"]').val(),
         location: $('#event-modal select[id="event-location"]').val(),
@@ -145,9 +146,9 @@ function saveEvent() {
         startDate: $('#event-modal input[name="event-start-date"]').datepicker('getDate'),
         endDate: $('#event-modal input[name="event-start-date"]').datepicker('getDate')
     }
-    var entries = $('#calendar').data('calendar').getDataSource();
+    const entries = $('#calendar').data('calendar').getDataSource();
     if (event.id) {
-        for (var i in entries) {
+        for (let i in entries) {
             if (entries[i].id == event.id) {
                 dbconnection.updateEntry({
                     entry: event,

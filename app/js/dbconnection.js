@@ -1,10 +1,10 @@
+import $ from 'jquery';
 import 'datejs';
 
 module.exports = {
     loadEntries: function(callback) {
         $.getJSON("./termine/", function(json) {
-            var entries = asCalendarDataSource(json);
-            callback(entries);
+            callback(asCalendarDataSource(json));
         });
     },
     loadLocations: function(callback) {
@@ -18,13 +18,17 @@ module.exports = {
         });
     },
     loadUser: function(callback) {
-        var pathSegments = window.location.pathname.split('/');
-        var userId = pathSegments.pop() || pathSegments.pop(); // trailing slash
-        $.getJSON("../benutzer/"+userId, function(json) {
+        const pathSegments = window.location.pathname.split('/');
+        const userId = pathSegments.pop() || pathSegments.pop(); // trailing slash
+        $.getJSON("../benutzer/" + userId, function(json) {
             callback(json);
         });
     },
-    addEntry: function({ entry, success, error }) {
+    addEntry: function({
+        entry,
+        success,
+        error
+    }) {
         entry.date = entry.startDate.toString("yyyy-MM-dd");
         $.ajax({
             url: "./termine/" + entry.date + "/",
@@ -35,7 +39,12 @@ module.exports = {
             error: error
         });
     },
-    updateEntry: function({ entry, oldDate, success, error }) {
+    updateEntry: function({
+        entry,
+        oldDate,
+        success,
+        error
+    }) {
         entry.date = entry.startDate.toString("yyyy-MM-dd");
         $.ajax({
             url: "./termine/" + oldDate.toString("yyyy-MM-dd") + "/",
@@ -45,7 +54,11 @@ module.exports = {
             error: error
         });
     },
-    deleteEntry: function({ entry, success, error }) {
+    deleteEntry: function({
+        entry,
+        success,
+        error
+    }) {
         entry.date = entry.startDate.toString("yyyy-MM-dd");
         $.ajax({
             url: "./termine/" + entry.date + "/",
@@ -58,7 +71,7 @@ module.exports = {
 
 function asCalendarDataSource(entries) {
     for (let i in entries) {
-        var entry = entries[i];
+        const entry = entries[i];
         entry.id = parseInt(entry.id);
         entry.startDate = Date.parse(entry.date);
         entry.supplement = entry.supplement == null ? '' : entry.supplement;

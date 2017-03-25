@@ -2,30 +2,36 @@ AddDefaultCharset UTF-8
 RewriteEngine on
 RewriteBase /kalender
 
+
+### user pages ###
+
 # redirect "kalender/2" to "kalender/2/" (enforce trailing slash)
 RewriteCond %{REQUEST_URI} !(/$|\.)
 RewriteRule (.*) %{REQUEST_URI}/ [R=301,L]
 
-# respond to "/kalender/" with "kalendar/userlist.html"
+# respond to "/kalender/" with "kalender/userlist.html"
 RewriteRule ^$ userlist.html
 
-# respond to "/kalender/123/" with "kalendar/calendar.html"
+# respond to "/kalender/123/" with "kalender/calendar.html"
 RewriteRule ^[0-9]+/$ calendar.html
-
-# respond to "/kalender/reiseziele/" with "kalender/locations.php
-RewriteRule ^reiseziele/$ locations.php
-
-# respond to "/kalender/benutzer/" with "kalender/users.php
-RewriteRule ^benutzer/$ users.php
-
-# respond to "/kalender/benutzer/123" with "kalender/users.php?user_id=123
-RewriteRule ^benutzer/([0-9]+)/$ users.php?user_id=$1
-
-# respond to "/kalender/123/termine/" with "kalender/entries.php?user_id=123"
-RewriteRule ^([0-9]+)/termine/$ entries.php?user_id=$1
-
-# respond to "/kalender/123/termine/2017-03-07" with "kalender/entries.php?user_id=123&date=2017-03-07"
-RewriteRule ^([0-9]+)/termine/([0-9]{4}-[0-9]{2}-[0-9]{2})/$ entries.php?user_id=$1&date=$2
 
 # respond to "/kalender/123/xyz.png" with "kalender/xyz.png"
 RewriteRule ^[0-9]+/(.+)$ $1
+
+
+### service pages ###
+
+# respond to "/kalender/api/reiseziele/" with "kalender/locations.php"
+RewriteRule ^api/reiseziele/$ locations.php
+
+# respond to "/kalender/api/benutzer/" with "kalender/users.php"
+RewriteRule ^api/benutzer/$ users.php
+
+# respond to "/kalender/api/benutzer/123/" with "kalender/users.php?user_id=123"
+RewriteRule ^api/benutzer/([0-9]+)/$ users.php?user_id=$1
+
+# respond to "/kalender/api/benutzer/123/termine/" with "kalender/entries.php?user_id=123"
+RewriteRule ^api/benutzer/([0-9]+)/termine/$ entries.php?user_id=$1
+
+# respond to "/kalender/api/benutzer/123/termine/2017-03-07/" with "kalender/entries.php?user_id=123&date=2017-03-07"
+RewriteRule ^api/benutzer/([0-9]+)/termine/([0-9]{4}-[0-9]{2}-[0-9]{2})/$ entries.php?user_id=$1&date=$2

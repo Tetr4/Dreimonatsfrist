@@ -16,20 +16,26 @@ import marker from './errormarker';
 import tooltip from './tooltip';
 import colors from './colors';
 
-
+var userId;
 $(function() {
+    userId = getUserId();
     initCalendar();
     initModal();
-    dbconnection.loadUser(function(user) {
-        const title = "Kalender von " + user.vorname + " " + user.name;
-        $('#user-name').text(title);
-        $(document).attr("title", title);
+
+    dbconnection.loadUser(userId, function(user) {
+        setTitle(user);
     });
-    dbconnection.loadEntries(function(entries) {
+    dbconnection.loadEntries(userId, function(entries) {
         marker.markErrors(entries);
         $('#calendar').data('calendar').setDataSource(entries);
     });
 });
+
+function getUserId() {
+    // userid is last segment of url (e.g. '/kalender/123/')
+    const pathSegments = window.location.pathname.split('/');
+    return pathSegments.pop() || pathSegments.pop(); // trailing slash
+}
 
 function initCalendar() {
     $('#calendar').calendar({
@@ -103,6 +109,12 @@ function initModal() {
     });
 }
 
+function setTitle(user) {
+    const title = "Kalender von " + user.vorname + " " + user.name;
+    $('#user-name').text(title);
+    $(document).attr("title", title);
+}
+
 function editEvent(event) {
     $('#event-modal input[name="event-index"]').val(event ? event.id : '');
     $('#event-modal input[name="event-mark"]').val(event ? event.mark : errormarker.NONE);
@@ -120,6 +132,7 @@ function deleteEvent() {
     for (let i in entries) {
         if (entries[i].id == id) {
             dbconnection.deleteEntry({
+                userId: userId,
                 entry: entries[i],
                 success: function() {
                     entries.splice(i, 1);
@@ -148,9 +161,11 @@ function saveEvent() {
     }
     const entries = $('#calendar').data('calendar').getDataSource();
     if (event.id) {
+        // update existing entry
         for (let i in entries) {
             if (entries[i].id == event.id) {
                 dbconnection.updateEntry({
+                    userId: userId,
                     entry: event,
                     oldDate: entries[i].startDate,
                     success: function() {
@@ -172,7 +187,9 @@ function saveEvent() {
             }
         }
     } else {
+        // add new entry
         dbconnection.addEntry({
+            userId: userId,
             entry: event,
             success: function(newId) {
                 event.id = newId;

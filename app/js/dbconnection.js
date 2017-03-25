@@ -2,52 +2,53 @@ import $ from 'jquery';
 import 'datejs';
 
 module.exports = {
-    loadEntries: function(callback) {
-        $.getJSON("./termine/", function(json) {
-            callback(asCalendarDataSource(json));
-        });
-    },
     loadLocations: function(callback) {
-        $.getJSON("../reiseziele/", function(json) {
+        $.getJSON('/kalender/api/reiseziele/', function(json) {
             callback(json);
         });
     },
     loadUsers: function(callback) {
-        $.getJSON("./benutzer/", function(json) {
+        $.getJSON('/kalender/api/benutzer/', function(json) {
             callback(json);
         });
     },
-    loadUser: function(callback) {
-        const pathSegments = window.location.pathname.split('/');
-        const userId = pathSegments.pop() || pathSegments.pop(); // trailing slash
-        $.getJSON("../benutzer/" + userId, function(json) {
+    loadUser: function(userId, callback) {
+        $.getJSON('/kalender/api/benutzer/' + userId, function(json) {
             callback(json);
+        });
+    },
+    loadEntries: function(userId, callback) {
+        $.getJSON('/kalender/api/benutzer/' + userId + '/termine/', function(json) {
+            callback(asCalendarDataSource(json));
         });
     },
     addEntry: function({
+        userId,
         entry,
         success,
         error
     }) {
-        entry.date = entry.startDate.toString("yyyy-MM-dd");
+        entry.date = entry.startDate.toString('yyyy-MM-dd');
         $.ajax({
-            url: "./termine/" + entry.date + "/",
+            url: '/kalender/api/benutzer/' + userId + '/termine/' + entry.date + '/',
             type: 'POST',
             data: entry,
-            dataType: "text",
+            dataType: 'text',
             success: success,
             error: error
         });
     },
     updateEntry: function({
+        userId,
         entry,
         oldDate,
         success,
         error
     }) {
-        entry.date = entry.startDate.toString("yyyy-MM-dd");
+        entry.date = entry.startDate.toString('yyyy-MM-dd');
+        oldDate = oldDate.toString('yyyy-MM-dd');
         $.ajax({
-            url: "./termine/" + oldDate.toString("yyyy-MM-dd") + "/",
+            url: '/kalender/api/benutzer/' + userId + '/termine/' + oldDate + '/',
             type: 'PUT',
             data: entry,
             success: success,
@@ -55,13 +56,14 @@ module.exports = {
         });
     },
     deleteEntry: function({
+        userId,
         entry,
         success,
         error
     }) {
-        entry.date = entry.startDate.toString("yyyy-MM-dd");
+        entry.date = entry.startDate.toString('yyyy-MM-dd');
         $.ajax({
-            url: "./termine/" + entry.date + "/",
+            url: '/kalender/api/benutzer/' + userId + '/termine/' + entry.date + '/',
             type: 'DELETE',
             success: success,
             error: error

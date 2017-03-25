@@ -47,9 +47,10 @@ function initCalendar() {
             if (e.events.length > 0) {
                 editEntry(e.events[0]);
             } else {
+                // new entry
                 editEntry({
                     startDate: e.date
-                })
+                });
             }
         },
         mouseOnDay: function(e) {
@@ -116,12 +117,13 @@ function setTitle(user) {
 }
 
 function editEntry(entry) {
-    $('#entry-modal input[name="entry-index"]').val(entry ? entry.id : '');
-    $('#entry-modal input[name="entry-mark"]').val(entry ? entry.mark : errormarker.NONE);
-    $('#entry-modal select[id="entry-location"]').selectpicker('val', entry ? entry.location : '');
-    $('#entry-modal select[id="entry-location-supplement"]').selectpicker('val', entry ? entry.supplement : '');
-    $('#entry-modal input[name="entry-comment"]').val(entry ? entry.comment : '');
-    $('#entry-modal input[name="entry-start-date"]').datepicker('update', entry ? entry.startDate : '');
+    $('#entry-modal input[name="entry-index"]').val(entry.id ? entry.id : '');
+    $('#entry-modal input[name="entry-user-index"]').val(entry.userId ? entry.userId : userId);
+    $('#entry-modal input[name="entry-mark"]').val(entry.mark ? entry.mark : marker.NONE);
+    $('#entry-modal select[id="entry-location"]').selectpicker('val', entry.location ? entry.location : '');
+    $('#entry-modal select[id="entry-location-supplement"]').selectpicker('val', entry.supplement ? entry.supplement : '');
+    $('#entry-modal input[name="entry-comment"]').val(entry.comment ? entry.comment : '');
+    $('#entry-modal input[name="entry-start-date"]').datepicker('update', entry.startDate ? entry.startDate : '');
     entry.id ? $('#delete-entry').show() : $('#delete-entry').hide();
     $('#entry-modal').modal();
 }
@@ -132,7 +134,6 @@ function deleteEntry() {
     for (let i in entries) {
         if (entries[i].id == id) {
             dbconnection.deleteEntry({
-                userId: userId,
                 entry: entries[i],
                 success: function() {
                     entries.splice(i, 1);
@@ -152,6 +153,7 @@ function deleteEntry() {
 function saveEntry() {
     const entry = {
         id: $('#entry-modal input[name="entry-index"]').val(),
+        userId: $('#entry-modal input[name="entry-user-index"]').val(),
         mark: $('#entry-modal input[name="entry-mark"]').val(),
         location: $('#entry-modal select[id="entry-location"]').val(),
         supplement: $('#entry-modal select[id="entry-location-supplement"]').val(),
@@ -165,9 +167,7 @@ function saveEntry() {
         for (let i in entries) {
             if (entries[i].id == entry.id) {
                 dbconnection.updateEntry({
-                    userId: userId,
                     entry: entry,
-                    oldDate: entries[i].startDate,
                     success: function() {
                         entries[i].mark = entry.mark;
                         entries[i].location = entry.location;
@@ -189,7 +189,6 @@ function saveEntry() {
     } else {
         // add new entry
         dbconnection.addEntry({
-            userId: userId,
             entry: entry,
             success: function(newId) {
                 entry.id = newId;

@@ -3,9 +3,13 @@ ini_set('display_errors', 'On');
 require_once "include/DatabaseConnection.php";
 require_once "include/Response.php";
 
-class CalendarService {
+class EntriesService {
     public function set_headers() {
-        header("Allow: HEAD, GET, PUT, POST, DELETE");
+        if (isset($_GET['entry_id'])) {
+            header("Allow: HEAD, GET, PUT, POST, DELETE");
+        } else {
+            header("Allow: GET");
+        }
     }
 
     public function disable_caching() {
@@ -13,23 +17,22 @@ class CalendarService {
     }
 
     public function process_request() {
-        $user_id = $this->get_user_id();
-        $calendar = new Calendar($user_id);
+        $entries = new Entries();
         switch ($_SERVER['REQUEST_METHOD']) {
             case 'GET':
-                $this->get($calendar);
+                $this->get($entries);
                 break;
             case 'POST':
-                $this->post($calendar);
+                $this->post($entries);
                 break;
             case 'PUT':
-                $this->put($calendar);
+                $this->put($entries);
                 break;
             case 'DELETE':
-                $this->delete($calendar);
+                $this->delete($entries);
                 break;
             case 'HEAD':
-                $this->head($calendar);
+                $this->head($entries);
                 break;
             default:
                 // 405 - Method Not Allowed
@@ -37,57 +40,45 @@ class CalendarService {
             }
     }
 
-    private function get_user_id() {
-        if (!isset($_GET['user_id'])) {
-            // 400 - Bad Request
-            respond(400, "User ID required");
-        }
-        return $_GET['user_id'];
-    }
-
-    private function get($calendar) {
-        if (isset($_GET['date'])) {
-            $calendar->get_entry($_GET['date']);
+    private function get($entries) {
+        if (isset($_GET['entry_id'])) {
+            $entries->get($_GET['entry_id']);
+        } else if (isset($_GET['user_id'])) {
+            $entries->get_for_user($_GET['user_id']);
         } else {
-            $calendar->get_entries();
+            $entries->get_all();
         }
     }
 
-    private function post($calendar) {
-        if(!isset($_GET['date'])) {
+    private function post($entries) {
+        if (isset($_GET['entry_id'])) {
             // 400 - Bad Request
-            respond(400, "Date required");
+            respond(400, "Cannot post on entry");
         }
         $data = $this->get_input_data();
-        if(!isset($data['location']) || !isset($data['supplement']) || !isset($data['comment'])) {
-            // 400 - Bad Request
-            respond(400, "Location, supplement (may be null) and comment (may be null) required");
-        }
-        $calendar->add_entry($_GET['date'], $data);
+        $this->validate($data);
+        $entries->add($data);
     }
 
-    private function put($calendar) {
-        if(!isset($_GET['date'])) {
+    private function put($entries) {
+        if(!isset($_GET['entry_id'])) {
             // 400 - Bad Request
-            respond(400, "Date required");
+            respond(400, "Entry ID required");
         }
         $data = $this->get_input_data();
-        if(!isset($data['location']) || !isset($data['date']) || !isset($data['supplement']) || !isset($data['comment'])) {
-            // 400 - Bad Request
-            respond(400, "New location, date, supplement (may be null) and comment (may be null) required");
-        }
-        $calendar->update_entry($_GET['date'], $data);
+        $this->validate($data);
+        $entries->update($_GET['entry_id'], $data);
     }
 
-    private function delete($calendar) {
-        if(!isset($_GET['date'])) {
+    private function delete($entries) {
+        if(!isset($_GET['entry_id'])) {
             // 400 - Bad Request
-            respond(400, "Entry required");
+            respond(400, "Entry ID required");
         }
-        $calendar->delete_entry($_GET['date']);
+        $entries->delete($_GET['entry_id']);
     }
 
-    private function head($calendar) {
+    private function head($entries) {
         // 200 OK
         respond(200, "Entry list found");
     }
@@ -108,53 +99,33 @@ class CalendarService {
             return $urlencoded;
         }
     }
+
+    private function validate($data) {
+        $required_fields = array('userId', 'date', 'location', 'supplement', 'comment');
+        foreach ($required_fields as $field) {
+            if(!isset($data[$field])) {
+                // 400 - Bad Request
+                respond(400, "userId, date, location, supplement (may be 'null') and comment (may be 'null') are required");
+            }
+        }
+    }
 }
 
-class Calendar extends DatabaseConnection {
-    private $user_id;
-
-	function __construct($user_id) {
-        parent::__construct();
-        $this->user_id = $this->mysqli->real_escape_string($user_id);
-	}
-
-	public function get_entries() {
-		$result = $this->mysqli->query("
-				SELECT e.ID AS id,
-                       e.Date AS date,
-                       l.Name AS location,
-                       e.LocationSupplement AS supplement,
-                       e.Comment AS comment
-				FROM `Entry` AS e
-       				JOIN Location AS l
-         			  ON e.Location = l.ID
-				WHERE  e.User = $this->user_id
-		");
-		if ($this->mysqli->error) {
-			// 500 - Internal Server Error
-			respond(500, "Error: " . $this->mysqli->error);
-		}
-		if($result->num_rows === 0) {
-			// 404 - Not Found
-			respond(404, "Entries for user $this->user_id not found");
-		}
-        // 200 - OK
-		respond(200, "Entries found", $this->sql_result_to_array($result));
-	}
-
-    public function get_entry($date) {
-        $date = $this->mysqli->real_escape_string($date);
+class Entries extends DatabaseConnection {
+    public function get($entry_id) {
+        $entry_id = $this->mysqli->real_escape_string($entry_id);
         $result = $this->mysqli->query("
-				SELECT e.ID AS id,
+                SELECT e.ID AS id,
+                       e.User AS userId,
                        e.Date AS date,
                        l.Name AS location,
                        e.LocationSupplement AS supplement,
                        e.Comment AS comment
-				FROM `Entry` AS e
-       				JOIN Location AS l
-         			  ON e.Location = l.ID
-				WHERE e.User = $this->user_id AND e.Date = '$date'
-		");
+                FROM `Entry` AS e
+                    JOIN Location AS l
+                      ON e.Location = l.ID
+                WHERE e.ID = $entry_id
+        ");
         if ($this->mysqli->error) {
             // 500 - Internal Server Error
             respond(500, "Error: " . $this->mysqli->error);
@@ -167,14 +138,65 @@ class Calendar extends DatabaseConnection {
         respond(200, "Entry found", $result->fetch_assoc());
     }
 
-    public function add_entry($date, $data) {
-        $date = $this->mysqli->real_escape_string($date);
+	public function get_for_user($user_id) {
+        $user_id = $this->mysqli->real_escape_string($user_id);
+		$result = $this->mysqli->query("
+				SELECT e.ID AS id,
+                       e.User AS userId,
+                       e.Date AS date,
+                       l.Name AS location,
+                       e.LocationSupplement AS supplement,
+                       e.Comment AS comment
+				FROM `Entry` AS e
+       				JOIN Location AS l
+         			  ON e.Location = l.ID
+				WHERE e.User = $user_id
+		");
+		if ($this->mysqli->error) {
+			// 500 - Internal Server Error
+			respond(500, "Error: " . $this->mysqli->error);
+		}
+		if($result->num_rows === 0) {
+			// 404 - Not Found
+			respond(404, "Entries for user $user_id not found");
+		}
+        // 200 - OK
+		respond(200, "Entries found", $this->sql_result_to_array($result));
+	}
+
+    public function get_all() {
+        $result = $this->mysqli->query("
+                SELECT e.ID AS id,
+                       e.User AS userId,
+                       e.Date AS date,
+                       l.Name AS location,
+                       e.LocationSupplement AS supplement,
+                       e.Comment AS comment
+                FROM `Entry` AS e
+                    JOIN Location AS l
+                      ON e.Location = l.ID
+        ");
+        if ($this->mysqli->error) {
+            // 500 - Internal Server Error
+            respond(500, "Error: " . $this->mysqli->error);
+        }
+        if($result->num_rows === 0) {
+            // 404 - Not Found
+            respond(404, "Entries not found");
+        }
+        // 200 - OK
+        respond(200, "Entries found", $this->sql_result_to_array($result));
+    }
+
+    public function add($data) {
+        $user_id = $this->mysqli->real_escape_string($data['userId']);
+        $date = $this->mysqli->real_escape_string($data['date']);
         $location_id = $this->get_location_id($data['location']);
         $supplement = $this->as_sql_null_or_nonempty_sql_string($data['supplement']);
         $comment = $this->as_sql_null_or_nonempty_sql_string($data['comment']);
         $this->mysqli->query("
                 INSERT INTO `Entry` (`ID`, `User`, `Date`, `Location`, `LocationSupplement`, `Comment`)
-                    SELECT NULL, $this->user_id, '$date', $location_id, $supplement, $comment
+                    SELECT NULL, $user_id, '$date', $location_id, $supplement, $comment
         ");
         if ($this->mysqli->error) {
             // 500 - Internal Server Error
@@ -184,24 +206,26 @@ class Calendar extends DatabaseConnection {
         respond(201, "Entry created", $this->mysqli->insert_id);
     }
 
-    public function update_entry($date, $data){
-        if(!$this->entry_exists($date)) {
+    public function update($entry_id, $data){
+        if(!$this->entry_exists($entry_id)) {
             // 404 - Not Found
             respond(404, "Entry not found");
         }
-        $date = $this->mysqli->real_escape_string($date);
-        $new_date = $this->mysqli->real_escape_string($data['date']);
-        $new_location_id = $this->get_location_id($data['location']);
+        $entry_id = $this->mysqli->real_escape_string($entry_id);
+        $user_id = $this->mysqli->real_escape_string($data['userId']);
+        $date = $this->mysqli->real_escape_string($data['date']);
+        $location_id = $this->get_location_id($data['location']);
         $supplement = $this->as_sql_null_or_nonempty_sql_string($data['supplement']);
         $comment = $this->as_sql_null_or_nonempty_sql_string($data['comment']);
         $result = $this->mysqli->query("
                 UPDATE `Entry`
                 SET
-                    Date = '$new_date',
-                    Location = $new_location_id,
+                    Date = '$date',
+                    User = $user_id,
+                    Location = $location_id,
                     LocationSupplement = $supplement,
                     Comment = $comment
-                WHERE User = $this->user_id AND Date = '$date'
+                WHERE ID = $entry_id
         ");
         if ($this->mysqli->error) {
             // 500 - Internal Server Error
@@ -235,11 +259,10 @@ class Calendar extends DatabaseConnection {
         return "'".$this->mysqli->real_escape_string($val)."'";
     }
 
-    private function entry_exists($date) {
-        $date = $this->mysqli->real_escape_string($date);
+    private function entry_exists($entry_id) {
+        $entry_id = $this->mysqli->real_escape_string($entry_id);
         $result = $this->mysqli->query("
-                SELECT * FROM `Entry`
-                WHERE User = $this->user_id AND Date = '$date'
+                SELECT * FROM `Entry` WHERE ID = $entry_id
         ");
         if ($this->mysqli->error) {
             // 500 - Internal Server Error
@@ -248,17 +271,15 @@ class Calendar extends DatabaseConnection {
         return $result->num_rows !== 0;
     }
 
-    public function delete_entry($date) {
-        $date = $this->mysqli->real_escape_string($date);
+    public function delete($entry_id) {
+        $entry_id = $this->mysqli->real_escape_string($entry_id);
         $result = $this->mysqli->query("
-                DELETE FROM `Entry`
-                WHERE User = $this->user_id AND Date = '$date'
+                DELETE FROM `Entry` WHERE ID = $entry_id
         ");
         if ($this->mysqli->error) {
             // 500 - Internal Server Error
             respond(500, "Error: " . $this->mysqli->error);
         }
-        var_dump($result->affected_rows);
         if($this->mysqli->affected_rows === 0) {
             // 404 - Not Found
             respond(404, "Entry not found");
@@ -268,7 +289,7 @@ class Calendar extends DatabaseConnection {
     }
 }
 
-$service = new CalendarService();
+$service = new EntriesService();
 $service->set_headers();
 $service->disable_caching();
 $service->process_request();

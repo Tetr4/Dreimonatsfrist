@@ -6,7 +6,7 @@ module.exports = function(color, entry) {
         location = location + ' - ' + entry.supplement;
     }
 
-    const tooltip = $('<div class="event-tooltip-content">' +
+    const tooltip = $('<div class="entry-tooltip-content">' +
         '<div class="tooltip-location" style="color:' + color + '"></div>' +
         '<div class="tooltip-comment"></div>' +
         '</div>');

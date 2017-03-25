@@ -45,9 +45,9 @@ function initCalendar() {
         style: 'custom',
         clickDay: function(e) {
             if (e.events.length > 0) {
-                editEvent(e.events[0]);
+                editEntry(e.events[0]);
             } else {
-                editEvent({
+                editEntry({
                     startDate: e.date
                 })
             }
@@ -76,9 +76,9 @@ function initCalendar() {
         dayContextMenu: function(e) {
             $(e.element).popover('hide');
         },
-        customDataSourceRenderer: function(element, date, events) {
-            if (events.length > 0) {
-                const shadowColor = colors.fromMark[events[0].mark];
+        customDataSourceRenderer: function(element, date, entries) {
+            if (entries.length > 0) {
+                const shadowColor = colors.fromMark[entries[0].mark];
                 const boxShadow = 'inset 0 -' + 4 + 'px 0 0 ' + shadowColor;
                 element.parent().css('box-shadow', boxShadow);
             }
@@ -87,25 +87,25 @@ function initCalendar() {
 }
 
 function initModal() {
-    $('#save-event').click(function() {
-        saveEvent();
+    $('#save-entry').click(function() {
+        saveEntry();
     });
-    $('#delete-event').click(function() {
-        deleteEvent();
+    $('#delete-entry').click(function() {
+        deleteEntry();
     });
     const letters = "abcdefghijklmnopqrstuvwxyz".toUpperCase().split("");
     for (let i in letters) {
         const option = $('<option>').val(letters[i]).text(letters[i]);
-        $('#event-location-supplement').append(option);
+        $('#entry-location-supplement').append(option);
     };
-    $("#event-location-supplement").selectpicker("refresh");
+    $("#entry-location-supplement").selectpicker("refresh");
     dbconnection.loadLocations(function(locations) {
         for (let i in locations) {
             const location = locations[i].name;
             const option = $('<option>').val(location).text(location);
-            $('#event-location').append(option);
+            $('#entry-location').append(option);
         }
-        $("#event-location").selectpicker("refresh");
+        $("#entry-location").selectpicker("refresh");
     });
 }
 
@@ -115,19 +115,19 @@ function setTitle(user) {
     $(document).attr("title", title);
 }
 
-function editEvent(event) {
-    $('#event-modal input[name="event-index"]').val(event ? event.id : '');
-    $('#event-modal input[name="event-mark"]').val(event ? event.mark : errormarker.NONE);
-    $('#event-modal select[id="event-location"]').selectpicker('val', event ? event.location : '');
-    $('#event-modal select[id="event-location-supplement"]').selectpicker('val', event ? event.supplement : '');
-    $('#event-modal input[name="event-comment"]').val(event ? event.comment : '');
-    $('#event-modal input[name="event-start-date"]').datepicker('update', event ? event.startDate : '');
-    event.id ? $('#delete-event').show() : $('#delete-event').hide();
-    $('#event-modal').modal();
+function editEntry(entry) {
+    $('#entry-modal input[name="entry-index"]').val(entry ? entry.id : '');
+    $('#entry-modal input[name="entry-mark"]').val(entry ? entry.mark : errormarker.NONE);
+    $('#entry-modal select[id="entry-location"]').selectpicker('val', entry ? entry.location : '');
+    $('#entry-modal select[id="entry-location-supplement"]').selectpicker('val', entry ? entry.supplement : '');
+    $('#entry-modal input[name="entry-comment"]').val(entry ? entry.comment : '');
+    $('#entry-modal input[name="entry-start-date"]').datepicker('update', entry ? entry.startDate : '');
+    entry.id ? $('#delete-entry').show() : $('#delete-entry').hide();
+    $('#entry-modal').modal();
 }
 
-function deleteEvent() {
-    const id = $('#event-modal input[name="event-index"]').val();
+function deleteEntry() {
+    const id = $('#entry-modal input[name="entry-index"]').val();
     const entries = $('#calendar').data('calendar').getDataSource();
     for (let i in entries) {
         if (entries[i].id == id) {
@@ -138,7 +138,7 @@ function deleteEvent() {
                     entries.splice(i, 1);
                     marker.markErrors(entries);
                     $('#calendar').data('calendar').setDataSource(entries);
-                    $('#event-modal').modal('hide');
+                    $('#entry-modal').modal('hide');
                 },
                 error: function(jqXHR, textStatus, error) {
                     alert(textStatus + ': ' + error);
@@ -149,35 +149,35 @@ function deleteEvent() {
     }
 }
 
-function saveEvent() {
-    const event = {
-        id: $('#event-modal input[name="event-index"]').val(),
-        mark: $('#event-modal input[name="event-mark"]').val(),
-        location: $('#event-modal select[id="event-location"]').val(),
-        supplement: $('#event-modal select[id="event-location-supplement"]').val(),
-        comment: $('#event-modal input[name="event-comment"]').val().trim(),
-        startDate: $('#event-modal input[name="event-start-date"]').datepicker('getDate'),
-        endDate: $('#event-modal input[name="event-start-date"]').datepicker('getDate')
+function saveEntry() {
+    const entry = {
+        id: $('#entry-modal input[name="entry-index"]').val(),
+        mark: $('#entry-modal input[name="entry-mark"]').val(),
+        location: $('#entry-modal select[id="entry-location"]').val(),
+        supplement: $('#entry-modal select[id="entry-location-supplement"]').val(),
+        comment: $('#entry-modal input[name="entry-comment"]').val().trim(),
+        startDate: $('#entry-modal input[name="entry-start-date"]').datepicker('getDate'),
+        endDate: $('#entry-modal input[name="entry-start-date"]').datepicker('getDate')
     }
     const entries = $('#calendar').data('calendar').getDataSource();
-    if (event.id) {
+    if (entry.id) {
         // update existing entry
         for (let i in entries) {
-            if (entries[i].id == event.id) {
+            if (entries[i].id == entry.id) {
                 dbconnection.updateEntry({
                     userId: userId,
-                    entry: event,
+                    entry: entry,
                     oldDate: entries[i].startDate,
                     success: function() {
-                        entries[i].mark = event.mark;
-                        entries[i].location = event.location;
-                        entries[i].supplement = event.supplement;
-                        entries[i].comment = event.comment;
-                        entries[i].startDate = event.startDate;
-                        entries[i].endDate = event.startDate;
+                        entries[i].mark = entry.mark;
+                        entries[i].location = entry.location;
+                        entries[i].supplement = entry.supplement;
+                        entries[i].comment = entry.comment;
+                        entries[i].startDate = entry.startDate;
+                        entries[i].endDate = entry.startDate;
                         marker.markErrors(entries);
                         $('#calendar').data('calendar').setDataSource(entries);
-                        $('#event-modal').modal('hide');
+                        $('#entry-modal').modal('hide');
                     },
                     error: function(jqXHR, textStatus, error) {
                         alert(textStatus + ': ' + error);
@@ -190,13 +190,13 @@ function saveEvent() {
         // add new entry
         dbconnection.addEntry({
             userId: userId,
-            entry: event,
+            entry: entry,
             success: function(newId) {
-                event.id = newId;
-                entries.push(event);
+                entry.id = newId;
+                entries.push(entry);
                 marker.markErrors(entries);
                 $('#calendar').data('calendar').setDataSource(entries);
-                $('#event-modal').modal('hide');
+                $('#entry-modal').modal('hide');
             },
             error: function(jqXHR, textStatus, error) {
                 alert(textStatus + ': ' + error);

@@ -6,7 +6,8 @@ Calendar that automatically marks dates, regarding time limits for travel expens
 Kalendar der automatisch Reisetermine markiert, die außerhalb der Dreimonatsfrist bezüglich Abzug der Verpflegungsmehraufwendungen liegen.  
 Siehe [§ 9 Abs. 4a Sätze 6 und 7 EStG](https://www.gesetze-im-internet.de/estg/__9.html).
 
-![Recording](https://cloud.githubusercontent.com/assets/3826929/24224516/d42be88c-0f5b-11e7-959e-1458500b3a4f.gif)
+![Recording](https://cloud.githubusercontent.com/assets/3826929/24327815/cf8fb818-11da-11e7-8007-a50c601a7c38.gif)
+
 
 
 ## Building

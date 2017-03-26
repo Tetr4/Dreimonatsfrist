@@ -7,14 +7,19 @@ import dbconnection from './dbconnection';
 
 var users;
 $(function() {
-    dbconnection.loadUsers(function(result) {
-        users = result;
-        onSearch($('#mitarbeiter_suche').val());
-        $('#mitarbeiter_suche').on('input', function() {
-            onSearch($(this).val());
-        });
+    dbconnection.loadUsers({
+        withEntries: false,
+        success: onUsersAvailable
     });
 });
+
+function onUsersAvailable(availableUsers) {
+    users = availableUsers;
+    onSearch($('#mitarbeiter_suche').val());
+    $('#mitarbeiter_suche').on('input', function() {
+        onSearch($(this).val());
+    });
+}
 
 function onSearch(query) {
     const result = users.filter(function(user) {

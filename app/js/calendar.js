@@ -22,17 +22,20 @@ $(function() {
     initCalendar();
     initModal();
 
-    dbconnection.loadUser(userId, function(user) {
-        setTitle(user);
-    });
-    dbconnection.loadEntries(userId, function(entries) {
-        marker.markErrors(entries);
-        $('#calendar').data('calendar').setDataSource(entries);
+    dbconnection.loadUser({
+        userId: userId,
+        withEntries: true,
+        success: function(user) {
+            setTitle(user);
+            marker.markErrors(user.entries);
+            $('#calendar').data('calendar').setDataSource(user.entries);
+        },
+        error: showError
     });
 });
 
 function getUserId() {
-    // userid is last segment of url (e.g. '/kalender/123/')
+    // userid is last segment of url (e.g. '/kalender/123')
     const pathSegments = window.location.pathname.split('/');
     return pathSegments.pop() || pathSegments.pop(); // trailing slash
 }
@@ -100,13 +103,16 @@ function initModal() {
         $('#entry-location-supplement').append(option);
     };
     $("#entry-location-supplement").selectpicker("refresh");
-    dbconnection.loadLocations(function(locations) {
-        for (let i in locations) {
-            const location = locations[i].name;
-            const option = $('<option>').val(location).text(location);
-            $('#entry-location').append(option);
-        }
-        $("#entry-location").selectpicker("refresh");
+    dbconnection.loadLocations({
+        success: function(locations) {
+            for (let i in locations) {
+                const location = locations[i].name;
+                const option = $('<option>').val(location).text(location);
+                $('#entry-location').append(option);
+            }
+            $("#entry-location").selectpicker("refresh");
+        },
+        error: showError
     });
 }
 
@@ -114,6 +120,10 @@ function setTitle(user) {
     const title = "Kalender von " + user.vorname + " " + user.name;
     $('#user-name').text(title);
     $(document).attr("title", title);
+}
+
+function showError(jqXHR, textStatus, error) {
+    alert(textStatus + ': ' + error);
 }
 
 function editEntry(entry) {
@@ -179,9 +189,7 @@ function saveEntry() {
                         $('#calendar').data('calendar').setDataSource(entries);
                         $('#entry-modal').modal('hide');
                     },
-                    error: function(jqXHR, textStatus, error) {
-                        alert(textStatus + ': ' + error);
-                    }
+                    error: showError
                 });
                 break;
             }
@@ -197,9 +205,7 @@ function saveEntry() {
                 $('#calendar').data('calendar').setDataSource(entries);
                 $('#entry-modal').modal('hide');
             },
-            error: function(jqXHR, textStatus, error) {
-                alert(textStatus + ': ' + error);
-            }
+            error: showError
         });
     }
 }

@@ -2,26 +2,59 @@ import $ from 'jquery';
 import 'datejs';
 
 module.exports = {
-    loadLocations: function(callback) {
-        $.getJSON('/kalender/api/locations', function(json) {
-            callback(json);
+    loadLocations: function({
+        success,
+        error
+    }) {
+        $.ajax({
+            url: '/kalender/api/locations',
+            dataType: 'json',
+            success: success,
+            error: error
         });
     },
-    loadUsers: function(callback) {
-        $.getJSON('/kalender/api/users', function(json) {
-            callback(json);
+
+    loadUsers: function({
+        withEntries,
+        success,
+        error
+    }) {
+        const query = withEntries ? '?embed_entries=1' : '';
+        $.ajax({
+            url: '/kalender/api/users' + query,
+            dataType: 'json',
+            success: function(users) {
+                for (let i in users) {
+                    if (users[i].entries) {
+                        users[i].entries = asCalendarDataSource(users[i].entries);
+                    }
+                }
+                success(users);
+            },
+            error: error
         });
     },
-    loadUser: function(userId, callback) {
-        $.getJSON('/kalender/api/users/' + userId, function(json) {
-            callback(json);
+
+    loadUser: function({
+        userId,
+        withEntries,
+        success,
+        error
+    }) {
+        const query = withEntries ? '?embed_entries=1' : '';
+        $.ajax({
+            url: '/kalender/api/users/' + userId + query,
+            dataType: 'json',
+            success: function(user) {
+                if (user.entries) {
+                    user.entries = asCalendarDataSource(user.entries);
+                }
+                success(user);
+            },
+            error: error
         });
     },
-    loadEntries: function(userId, callback) {
-        $.getJSON('/kalender/api/entries?user_id=' + userId, function(json) {
-            callback(asCalendarDataSource(json));
-        });
-    },
+
     addEntry: function({
         entry,
         success,
@@ -37,6 +70,7 @@ module.exports = {
             error: error
         });
     },
+
     updateEntry: function({
         entry,
         success,
@@ -51,6 +85,7 @@ module.exports = {
             error: error
         });
     },
+
     deleteEntry: function({
         entry,
         success,

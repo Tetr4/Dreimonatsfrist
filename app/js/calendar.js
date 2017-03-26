@@ -130,7 +130,7 @@ function editEntry(entry) {
     $('#entry-modal input[name="entry-index"]').val(entry.id ? entry.id : '');
     $('#entry-modal input[name="entry-user-index"]').val(entry.userId ? entry.userId : userId);
     $('#entry-modal input[name="entry-mark"]').val(entry.mark ? entry.mark : marker.NONE);
-    $('#entry-modal select[id="entry-location"]').selectpicker('val', entry.location ? entry.location : '');
+    entry.location && $('#entry-modal select[id="entry-location"]').selectpicker('val', entry.location); // reuse if unavailable
     $('#entry-modal select[id="entry-location-supplement"]').selectpicker('val', entry.supplement ? entry.supplement : '');
     $('#entry-modal input[name="entry-comment"]').val(entry.comment ? entry.comment : '');
     $('#entry-modal input[name="entry-start-date"]').datepicker('update', entry.startDate ? entry.startDate : '');

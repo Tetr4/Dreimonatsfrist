@@ -33,8 +33,8 @@
                         <form class="form-horizontal">
                             <div class="form-group">
                                 <label for="entry-location" class="col-sm-2 control-label">Reiseziel</label>
-                                <div class="col-sm-5">
-                                    <select id="entry-location" class="selectpicker" data-live-search="true">
+                                <div class="col-sm-7">
+                                    <select id="entry-location" class="selectpicker" data-live-search="true" data-width="100%">
                                     </select>
                                 </div>
                                 <div class="col-sm-3">
@@ -44,17 +44,20 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="entry-comment" class="col-sm-2 control-label">Kommentar</label>
-                                <div class="col-sm-8">
-                                    <input id="entry-comment" name="entry-comment" type="text" class="form-control">
-                                </div>
-                            </div>
-                            <div class="form-group">
                                 <label for="entry-start-date" class="col-sm-2 control-label">Datum</label>
                                 <div class="col-sm-7">
                                     <div class="input-group input-daterange" data-provide="datepicker">
                                         <input name="entry-start-date" type="text" class="form-control" value="2016-04-05">
                                     </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="entry-comment" class="col-sm-2 control-label">Kommentar</label>
+                                <div class="col-sm-7">
+                                    <input id="entry-comment" name="entry-comment" type="text" class="form-control">
+                                </div>
+                                <div class="col-sm-3">
+                                    <input id="entry-processed" name="entry-processed" type="checkbox"  class="form-control" data-toggle="toggle" data-onstyle="success" data-on="erledigt" data-off="offen" data-width="100%"/>
                                 </div>
                             </div>
                         </form>

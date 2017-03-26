@@ -8,6 +8,8 @@ import 'bootstrap-year-calendar/js/languages/bootstrap-year-calendar.de.js';
 import 'bootstrap-year-calendar/css/bootstrap-year-calendar.css';
 import 'bootstrap-select';
 import 'bootstrap-select/dist/css/bootstrap-select.css';
+import 'bootstrap-toggle'
+import 'bootstrap-toggle/css/bootstrap-toggle.css'
 import $ from 'jquery';
 import 'datejs';
 import "../css/calendar.css";
@@ -97,6 +99,12 @@ function initModal() {
     $('#delete-entry').click(function() {
         deleteEntry();
     });
+    $('#entry-comment').on('input', function() {
+        const hasComment = $(this).val().trim().length > 0;
+        $('#entry-processed').bootstrapToggle('enable')
+        $('#entry-processed').bootstrapToggle(hasComment ? 'on' : 'off')
+        $('#entry-processed').bootstrapToggle('disable')
+    });
     const letters = "abcdefghijklmnopqrstuvwxyz".toUpperCase().split("");
     for (let i in letters) {
         const option = $('<option>').val(letters[i]).text(letters[i]);
@@ -132,7 +140,7 @@ function editEntry(entry) {
     $('#entry-modal input[name="entry-mark"]').val(entry.mark ? entry.mark : marker.NONE);
     entry.location && $('#entry-modal select[id="entry-location"]').selectpicker('val', entry.location); // reuse if unavailable
     $('#entry-modal select[id="entry-location-supplement"]').selectpicker('val', entry.supplement ? entry.supplement : '');
-    $('#entry-modal input[name="entry-comment"]').val(entry.comment ? entry.comment : '');
+    $('#entry-modal input[name="entry-comment"]').val(entry.comment ? entry.comment : '').trigger('input'); // update processed-toggle
     $('#entry-modal input[name="entry-start-date"]').datepicker('update', entry.startDate ? entry.startDate : '');
     entry.id ? $('#delete-entry').show() : $('#delete-entry').hide();
     $('#entry-modal').modal();

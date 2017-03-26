@@ -31,13 +31,21 @@ function onUsersAvailable(availableUsers) {
 function onSearch(query) {
     clearList();
     var result;
-    if ($('#error-toggle').prop('checked')) {
+    if (shouldShowErrors()) {
         errorUsers = errorUsers ? errorUsers : filter.getErrorUsers(users);
         result = filter.getMatchingUsers(errorUsers, query);
     } else {
         result = filter.getMatchingUsers(users, query);
     }
     showUsers(result);
+}
+
+function shouldShowErrors() {
+    return $('#error-toggle').prop('checked');
+}
+
+function clearList() {
+    $('#mitarbeiterausgabe tr:not(:first)').remove();
 }
 
 function showUsers(users) {
@@ -48,13 +56,10 @@ function showUsers(users) {
         row.append($('<td>').text(users[i].id));
         row.append($('<td>').text(users[i].firma));
         row.append($('<td>').text(users[i].kostenstelle));
-        const button = $('<a class="btn btn-primary" role="button">Auswählen</a>')
-            .attr("href", "./" + users[i].id);
+        const button = $('<a class="btn" role="button">Auswählen</a>')
+            .attr("href", "./" + users[i].id)
+            .addClass(shouldShowErrors() ? 'btn-warning' : 'btn-success');
         row.append($('<td>').append(button));
         $('#mitarbeiterausgabe').append(row);
     }
-}
-
-function clearList() {
-    $('#mitarbeiterausgabe tr:not(:first)').remove();
 }

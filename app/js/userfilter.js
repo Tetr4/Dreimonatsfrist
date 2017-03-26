@@ -17,15 +17,17 @@ function markEntries(user) {
 }
 
 function collectErrorUsers(collector, user) {
-    if (containsMark(user.entries, marker.ERROR)) {
+    if (containsErrorEntry(user.entries)) {
         collector.push(user)
     }
     return collector;
 }
 
-function containsMark(entries, mark) {
+function containsErrorEntry(entries) {
     for (let i in entries) {
-        if (entries[i].mark === mark) {
+        const hasError = entries[i].mark === marker.ERROR;
+        const isProccessed = entries[i].comment.trim().length > 0;
+        if (hasError && !isProccessed) {
             return true;
         }
     }

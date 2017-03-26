@@ -1,14 +1,18 @@
 import 'babel-polyfill';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
+import 'bootstrap-toggle'
+import 'bootstrap-toggle/css/bootstrap-toggle.css'
 import $ from 'jquery';
 import "../css/userlist.css";
 import dbconnection from './dbconnection';
+import filter from './userfilter';
 
 var users;
+var errorUsers;
 $(function() {
     dbconnection.loadUsers({
-        withEntries: false,
+        withEntries: true,
         success: onUsersAvailable
     });
 });
@@ -19,13 +23,20 @@ function onUsersAvailable(availableUsers) {
     $('#mitarbeiter_suche').on('input', function() {
         onSearch($(this).val());
     });
+    $('#error-toggle').change(function() {
+        onSearch($('#mitarbeiter_suche').val());
+    });
 }
 
 function onSearch(query) {
-    const result = users.filter(function(user) {
-        return user.name.startsWith(query) || user.id.startsWith(query);
-    });
     clearList();
+    var result;
+    if ($('#error-toggle').prop('checked')) {
+        errorUsers = errorUsers ? errorUsers : filter.getErrorUsers(users);
+        result = filter.getMatchingUsers(errorUsers, query);
+    } else {
+        result = filter.getMatchingUsers(users, query);
+    }
     showUsers(result);
 }
 

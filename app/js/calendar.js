@@ -12,7 +12,7 @@ import $ from 'jquery';
 import 'datejs';
 import "../css/calendar.css";
 import dbconnection from './dbconnection';
-import marker from './errormarker';
+import marker from './entrymarker';
 import tooltip from './tooltip';
 import colors from './colors';
 

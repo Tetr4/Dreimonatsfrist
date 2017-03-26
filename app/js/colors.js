@@ -1,4 +1,4 @@
-import marker from './errormarker';
+import marker from './entrymarker';
 
 const markToColor = [];
 markToColor[marker.NONE] = 'rgb(30, 200, 20)';
